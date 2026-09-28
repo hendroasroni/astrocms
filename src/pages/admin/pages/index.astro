@@ -3,104 +3,90 @@ import AdminLayout from "@layouts/AdminLayout.astro";
 ---
 
 <AdminLayout title="Kelola Halaman" activeMenu="pages">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-    <div>
-      <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a;">Daftar Halaman Statis</h2>
-      <p style="font-size: 0.85rem; color: #64748b;">Kelola konten halaman statis seperti Tentang Kami, Kontak, Kebijakan Privasi, dan FAQ.</p>
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header-info">
+      <h2>Daftar Halaman Statis</h2>
+      <p>Kelola konten halaman informasi utama seperti Tentang Kami, Kontak, dan Kebijakan Privasi.</p>
     </div>
     <button id="btn-open-modal" class="btn btn-primary btn-sm">+ Buat Halaman Baru</button>
   </div>
 
-  <div class="admin-card">
-    <div style="overflow-x: auto;">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Judul Halaman</th>
-            <th>Slug URL</th>
-            <th>Status</th>
-            <th>Terakhir Diubah</th>
-            <th style="text-align: right;">Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="pages-list">
-          <tr>
-            <td colspan="5" style="text-align: center; color: #94a3b8; padding: 2rem;">
-              Memuat data halaman...
-            </td>
-          </tr>
-        </tbody>
-      </table>
+  <!-- Search & Filter Toolbar -->
+  <div class="toolbar-card">
+    <div class="search-input-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-pages" class="search-input" placeholder="Cari nama halaman..." />
     </div>
   </div>
 
-  <!-- Modal Form Create/Edit Page -->
-  <div id="page-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; align-items: center; justify-content: center; padding: 1.5rem;">
-    <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; padding: 2rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h3 id="modal-title" style="font-size: 1.25rem; font-weight: 700;">Buat Halaman</h3>
-        <button id="btn-close-modal" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+  <!-- Pages Table -->
+  <div class="table-container">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Judul Halaman</th>
+          <th>Slug URL</th>
+          <th>Status</th>
+          <th>Terakhir Diubah</th>
+          <th style="text-align: right;">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="pages-list">
+        <tr>
+          <td colspan="5" style="text-align: center; color: var(--admin-text-muted); padding: 2.5rem;">
+            Memuat daftar halaman...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal Form Create / Edit Page -->
+  <div id="page-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-card" style="max-width: 720px;">
+      <div class="modal-header">
+        <h3 id="modal-title">Buat Halaman Baru</h3>
+        <button id="btn-close-modal" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--admin-text-muted); line-height: 1;">&times;</button>
       </div>
 
-      <form id="page-form">
+      <form id="page-form" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
         <input type="hidden" id="page-id" />
 
-        <div class="form-group">
-          <label class="form-label" for="page-title">Judul Halaman *</label>
-          <input class="form-input" type="text" id="page-title" required placeholder="Contoh: Kebijakan Privasi" />
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="page-title">Judul Halaman *</label>
+            <input class="form-input" type="text" id="page-title" required placeholder="Contoh: Kebijakan Privasi" />
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="page-slug">Slug URL *</label>
+              <input class="form-input" type="text" id="page-slug" required placeholder="kebijakan-privasi" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="page-status">Status Publikasi</label>
+              <select class="form-select" id="page-status">
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="page-content">Isi Konten Halaman (Markdown / Teks) *</label>
+            <textarea class="form-textarea" id="page-content" rows="8" required placeholder="Tuliskan isi informasi halaman di sini..."></textarea>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="page-slug">Slug URL *</label>
-          <input class="form-input" type="text" id="page-slug" required placeholder="kebijakan-privasi" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="page-status">Status</label>
-          <select class="form-select" id="page-status">
-            <option value="published">Published</option>
-            <option value="draft">Draft</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="page-content">Isi Konten Halaman (Markdown / Teks) *</label>
-          <textarea class="form-textarea" id="page-content" rows="8" required placeholder="Tuliskan isi halaman di sini..."></textarea>
-        </div>
-
-        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+        <div class="modal-footer">
           <button type="button" id="btn-cancel-modal" class="btn btn-outline btn-sm">Batal</button>
           <button type="submit" id="btn-save-page" class="btn btn-primary btn-sm">Simpan Halaman</button>
         </div>
       </form>
     </div>
   </div>
-
-  <style>
-    .btn-sm {
-      padding: 0.5rem 1rem;
-      font-size: 0.875rem;
-    }
-    .action-btn {
-      padding: 0.35rem 0.65rem;
-      font-size: 0.8rem;
-      border-radius: 6px;
-      cursor: pointer;
-      border: 1px solid var(--admin-border);
-      background: #ffffff;
-      margin-left: 0.35rem;
-    }
-    .action-btn:hover {
-      background: #f1f5f9;
-    }
-    .btn-delete {
-      color: #ef4444;
-      border-color: #fecaca;
-    }
-    .btn-delete:hover {
-      background: #fef2f2;
-    }
-  </style>
 
   <script>
     import { getPages, createPage, updatePage, deletePage } from "@core/content/pages";
@@ -111,6 +97,8 @@ import AdminLayout from "@layouts/AdminLayout.astro";
     let allPages: Page[] = [];
 
     const pagesList = document.getElementById("pages-list");
+    const searchInput = document.getElementById("search-pages") as HTMLInputElement;
+
     const modal = document.getElementById("page-modal");
     const modalTitle = document.getElementById("modal-title");
     const btnOpenModal = document.getElementById("btn-open-modal");
@@ -155,59 +143,85 @@ import AdminLayout from "@layouts/AdminLayout.astro";
     if (btnCloseModal) btnCloseModal.addEventListener("click", closeModal);
     if (btnCancelModal) btnCancelModal.addEventListener("click", closeModal);
 
-    async function loadPages() {
+    function renderFilteredPages() {
       if (!pagesList) return;
-      pagesList.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 2rem;">Memuat daftar halaman...</td></tr>`;
+      const search = searchInput.value.toLowerCase().trim();
+
+      const filtered = allPages.filter((page) => {
+        return page.title.toLowerCase().includes(search) || page.slug.toLowerCase().includes(search);
+      });
+
+      if (filtered.length === 0) {
+        pagesList.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; color: var(--admin-text-muted); padding: 3rem;">
+              <div style="font-size: 2rem; margin-bottom: 0.5rem;">📄</div>
+              <p style="font-weight: 600;">Tidak ada halaman yang cocok.</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      pagesList.innerHTML = filtered.map((page) => `
+        <tr>
+          <td>
+            <div style="font-weight: 600; color: var(--admin-text-main);">${page.title}</div>
+          </td>
+          <td style="color: var(--admin-text-muted); font-size: 0.85rem;">/${page.slug}</td>
+          <td>
+            <span class="status-pill ${page.status === 'published' ? 'published' : 'draft'}">
+              ${page.status === 'published' ? '● Published' : '○ Draft'}
+            </span>
+          </td>
+          <td style="font-size: 0.825rem; color: var(--admin-text-muted);">${formatDate(page.updated_at)}</td>
+          <td style="text-align: right;">
+            <div class="action-buttons">
+              <button class="btn-icon-action btn-edit" data-id="${page.id}">✏️ Edit</button>
+              <button class="btn-icon-action delete btn-delete" data-id="${page.id}">🗑️</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+
+      document.querySelectorAll(".btn-edit").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = (btn as HTMLElement).dataset.id;
+          const page = allPages.find((p) => p.id === id);
+          if (page) openModal(page);
+        });
+      });
+
+      document.querySelectorAll(".btn-delete").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = (btn as HTMLElement).dataset.id;
+          if (confirm("Apakah Anda yakin ingin menghapus halaman ini?")) {
+            if (id) {
+              await deletePage(id);
+              (window as any).showToast("Halaman berhasil dihapus!", "success");
+              loadPages();
+            }
+          }
+        });
+      });
+    }
+
+    async function loadPages() {
       try {
         allPages = await getPages();
         if (allPages.length === 0) {
-          // Default mock pages
           allPages = [
             { id: "page-1", title: "Tentang Kami", slug: "about", status: "published", content: "Profil usaha...", updated_at: new Date().toISOString() },
             { id: "page-2", title: "Kontak", slug: "contact", status: "published", content: "Informasi kontak...", updated_at: new Date().toISOString() },
           ];
         }
-
-        pagesList.innerHTML = allPages.map((page) => `
-          <tr>
-            <td style="font-weight: 600; color: #0f172a;">${page.title}</td>
-            <td style="color: #64748b; font-size: 0.85rem;">/${page.slug}</td>
-            <td>
-              <span style="background: ${page.status === 'published' ? '#dcfce7' : '#fef3c7'}; color: ${page.status === 'published' ? '#166534' : '#92400e'}; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
-                ${page.status}
-              </span>
-            </td>
-            <td style="font-size: 0.85rem; color: #64748b;">${formatDate(page.updated_at)}</td>
-            <td style="text-align: right;">
-              <button class="action-btn btn-edit" data-id="${page.id}">✏️ Edit</button>
-              <button class="action-btn btn-delete" data-id="${page.id}">🗑️ Hapus</button>
-            </td>
-          </tr>
-        `).join("");
-
-        document.querySelectorAll(".btn-edit").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            const id = (btn as HTMLElement).dataset.id;
-            const page = allPages.find((p) => p.id === id);
-            if (page) openModal(page);
-          });
-        });
-
-        document.querySelectorAll(".btn-delete").forEach((btn) => {
-          btn.addEventListener("click", async () => {
-            const id = (btn as HTMLElement).dataset.id;
-            if (confirm("Hapus halaman ini?")) {
-              if (id) {
-                await deletePage(id);
-                loadPages();
-              }
-            }
-          });
-        });
+        renderFilteredPages();
       } catch (err) {
         console.error(err);
       }
     }
+
+    searchInput.addEventListener("input", renderFilteredPages);
 
     pageForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -226,13 +240,15 @@ import AdminLayout from "@layouts/AdminLayout.astro";
       try {
         if (isEdit) {
           await updatePage(pageIdInput.value, pageData);
+          (window as any).showToast("Halaman berhasil diperbarui!", "success");
         } else {
           await createPage(pageData);
+          (window as any).showToast("Halaman baru berhasil dibuat!", "success");
         }
         closeModal();
         loadPages();
       } catch (err: any) {
-        alert("Gagal menyimpan halaman: " + (err.message || "Error"));
+        (window as any).showToast("Gagal menyimpan halaman: " + (err.message || "Error"), "error");
       } finally {
         btnSavePage.disabled = false;
         btnSavePage.textContent = "Simpan Halaman";

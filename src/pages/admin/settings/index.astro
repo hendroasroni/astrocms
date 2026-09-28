@@ -3,144 +3,204 @@ import AdminLayout from "@layouts/AdminLayout.astro";
 ---
 
 <AdminLayout title="Pengaturan Situs" activeMenu="settings">
-  <div style="margin-bottom: 1.5rem;">
-    <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a;">Pengaturan Website</h2>
-    <p style="font-size: 0.85rem; color: #64748b;">Kelola informasi situs, SEO, Deploy Hook, IndexNow, dan manajemen slot iklan.</p>
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header-info">
+      <h2>Pengaturan Website</h2>
+      <p>Kelola identitas situs, konfigurasi SEO, integrasi Deploy Hook, dan slot monetisasi iklan.</p>
+    </div>
   </div>
 
-  <div id="settings-feedback" style="display: none; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem;"></div>
+  <!-- Tab Navigation -->
+  <div class="settings-tabs">
+    <button type="button" class="tab-btn active" data-tab="tab-general">
+      <span>🏷️</span>
+      <span>Informasi Umum</span>
+    </button>
+    <button type="button" class="tab-btn" data-tab="tab-seo">
+      <span>🔍</span>
+      <span>SEO & Indexing</span>
+    </button>
+    <button type="button" class="tab-btn" data-tab="tab-ads">
+      <span>📢</span>
+      <span>Monetisasi Iklan</span>
+    </button>
+    <button type="button" class="tab-btn" data-tab="tab-deploy">
+      <span>🚀</span>
+      <span>Deploy & Hosting</span>
+    </button>
+    <button type="button" class="tab-btn" data-tab="tab-scripts">
+      <span>📊</span>
+      <span>Custom Scripts</span>
+    </button>
+  </div>
 
   <form id="settings-form">
-    <!-- General Settings -->
-    <div class="admin-card">
-      <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; color: #0f172a;">1. Informasi Umum</h3>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-        <div class="form-group">
-          <label class="form-label" for="site-name">Nama Website</label>
-          <input class="form-input" type="text" id="site-name" placeholder="Pempek Ilen" />
+    <!-- Tab 1: General Info -->
+    <div id="tab-general" class="tab-panel active">
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3 class="admin-card-title">Identitas Website & Kontak</h3>
         </div>
-        <div class="form-group">
-          <label class="form-label" for="site-tagline">Tagline Situs</label>
-          <input class="form-input" type="text" id="site-tagline" placeholder="Gurih, Lembut, dan Asli Palembang" />
-        </div>
-      </div>
 
-      <div class="form-group">
-        <label class="form-label" for="site-description">Deskripsi Singkat Situs</label>
-        <textarea class="form-textarea" id="site-description" rows="2" placeholder="Deskripsi untuk ringkasan dan meta SEO umum."></textarea>
-      </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+          <div class="form-group">
+            <label class="form-label" for="site-name">Nama Website</label>
+            <input class="form-input" type="text" id="site-name" placeholder="Pempek Ilen" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="site-tagline">Tagline / Slogan</label>
+            <input class="form-input" type="text" id="site-tagline" placeholder="Gurih, Lembut, dan Asli Palembang" />
+          </div>
+        </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
         <div class="form-group">
-          <label class="form-label" for="contact-whatsapp">WhatsApp (Format: 628...)</label>
-          <input class="form-input" type="text" id="contact-whatsapp" placeholder="628123456789" />
+          <label class="form-label" for="site-description">Deskripsi Singkat Situs (Meta Description)</label>
+          <textarea class="form-textarea" id="site-description" rows="2" placeholder="Deskripsi ringkas profil usaha untuk mesin pencari."></textarea>
         </div>
-        <div class="form-group">
-          <label class="form-label" for="contact-email">Email Kontak</label>
-          <input class="form-input" type="email" id="contact-email" placeholder="kontak@domain.com" />
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="social-instagram">Instagram URL</label>
-          <input class="form-input" type="url" id="social-instagram" placeholder="https://instagram.com/..." />
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem;">
+          <div class="form-group">
+            <label class="form-label" for="contact-whatsapp">Nomor WhatsApp (Format: 628...)</label>
+            <input class="form-input" type="text" id="contact-whatsapp" placeholder="628123456789" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="contact-email">Email Bisnis</label>
+            <input class="form-input" type="email" id="contact-email" placeholder="kontak@pempekilen.com" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="social-instagram">Instagram URL</label>
+            <input class="form-input" type="url" id="social-instagram" placeholder="https://instagram.com/pempekilen" />
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- SEO & IndexNow -->
-    <div class="admin-card">
-      <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; color: #0f172a;">2. SEO & Instant Indexing</h3>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-        <div class="form-group">
-          <label class="form-label" for="gsc-verification">Google Search Console Verification Code</label>
-          <input class="form-input" type="text" id="gsc-verification" placeholder="google-site-verification=..." />
+    <!-- Tab 2: SEO & Indexing -->
+    <div id="tab-seo" class="tab-panel">
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3 class="admin-card-title">Optimasi Mesin Pencari (Search Engine Optimization)</h3>
         </div>
-        <div class="form-group">
-          <label class="form-label" for="indexnow-key">IndexNow API Key (Bing / Instant Index)</label>
-          <input class="form-input" type="text" id="indexnow-key" placeholder="32-character key" />
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+          <div class="form-group">
+            <label class="form-label" for="gsc-verification">Google Search Console Verification Code</label>
+            <input class="form-input" type="text" id="gsc-verification" placeholder="google-site-verification=xxxx" />
+            <p class="form-hint">Kode meta verifikasi kepemilikan situs dari Google Search Console.</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="indexnow-key">IndexNow API Key (Bing / Instant Index)</label>
+            <input class="form-input" type="text" id="indexnow-key" placeholder="32 karakter key" />
+            <p class="form-hint">Otomatis mengirim sinyal pengindeksan instan ke mesin pencari setiap kali artikel dipublikasikan.</p>
+          </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="default-og-image">Default OG Image URL (Media Sosial)</label>
-        <input class="form-input" type="url" id="default-og-image" placeholder="https://.../og-banner.jpg" />
+
+        <div class="form-group">
+          <label class="form-label" for="default-og-image">Default Social Banner (OG Image URL)</label>
+          <input class="form-input" type="url" id="default-og-image" placeholder="https://.../og-banner.jpg" />
+          <p class="form-hint">Gambar pratinjau yang muncul saat link website dibagikan ke WhatsApp, Twitter, atau Facebook.</p>
+        </div>
       </div>
     </div>
 
-    <!-- Deploy Hooks -->
-    <div class="admin-card">
-      <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; color: #0f172a;">3. Deploy Webhook (Cloudflare Pages / Netlify)</h3>
-      <div class="form-group">
-        <label class="form-label" for="deploy-hook-url">Deploy Hook URL</label>
-        <input class="form-input" type="url" id="deploy-hook-url" placeholder="https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/..." />
-        <p style="font-size: 0.8rem; color: #64748b; margin-top: 0.35rem;">URL webhook yang dipanggil otomatis untuk men-trigger build SSG saat artikel baru di-publish.</p>
+    <!-- Tab 3: Ads & Monetization -->
+    <div id="tab-ads" class="tab-panel">
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3 class="admin-card-title">Manajemen Slot Iklan & Monetisasi</h3>
+        </div>
+
+        <div style="display: flex; gap: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+            <input type="checkbox" id="enable-ads-articles" checked />
+            <span>Aktifkan Iklan di Artikel Blog</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+            <input type="checkbox" id="enable-ads-homepage" />
+            <span>Aktifkan Iklan di Homepage</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="ads-paragraph-interval">Sisipkan Iklan In-Content Otomatis Setiap (N Paragraf)</label>
+          <input class="form-input" type="number" id="ads-paragraph-interval" min="1" max="10" value="2" style="max-width: 140px;" />
+          <p class="form-hint">Default: 2 (Iklan disisipkan otomatis setelah paragraf ke-2).</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+          <div class="form-group">
+            <label class="form-label" for="ads-header">Slot Iklan Header (Atas)</label>
+            <textarea class="form-textarea" id="ads-header" rows="3" placeholder="<script ...></script> atau banner ad unit"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="ads-before-content">Slot Iklan Sebelum Konten Artikel</label>
+            <textarea class="form-textarea" id="ads-before-content" rows="3" placeholder="<ins class='adsbygoogle' ...></ins>"></textarea>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+          <div class="form-group">
+            <label class="form-label" for="ads-in-content">Slot Iklan Sela Paragraf (In-Content)</label>
+            <textarea class="form-textarea" id="ads-in-content" rows="3" placeholder="<ins class='adsbygoogle' ...></ins>"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="ads-after-content">Slot Iklan Setelah Konten Artikel</label>
+            <textarea class="form-textarea" id="ads-after-content" rows="3" placeholder="<ins class='adsbygoogle' ...></ins>"></textarea>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="ads-footer">Slot Iklan Footer (Bawah)</label>
+          <textarea class="form-textarea" id="ads-footer" rows="3" placeholder="Sticky banner atau responsive footer ad"></textarea>
+        </div>
       </div>
     </div>
 
-    <!-- Ads & Monetization Engine -->
-    <div class="admin-card">
-      <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; color: #0f172a;">4. Manajemen Iklan & Slot Monetisasi</h3>
-      
-      <div style="display: flex; gap: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
-        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
-          <input type="checkbox" id="enable-ads-articles" checked />
-          Aktifkan Iklan di Artikel Blog
-        </label>
-        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
-          <input type="checkbox" id="enable-ads-homepage" />
-          Aktifkan Iklan di Homepage
-        </label>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="ads-paragraph-interval">Sisipkan Iklan In-Content Otomatis Setiap (N Paragraf)</label>
-        <input class="form-input" type="number" id="ads-paragraph-interval" min="1" max="10" value="2" style="max-width: 150px;" />
-        <p style="font-size: 0.8rem; color: #64748b; margin-top: 0.25rem;">Default: 2 (Iklan disisipkan setelah paragraf ke-2). Penulis juga bisa mengetik <code>&lt;!-- ad --&gt;</code> di artikel untuk posisi manual.</p>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-        <div class="form-group">
-          <label class="form-label" for="ads-header">Kode Iklan Header (Atas)</label>
-          <textarea class="form-textarea" id="ads-header" rows="3" placeholder="<script ...></script> atau banner leaderboard"></textarea>
+    <!-- Tab 4: Deploy & Webhook -->
+    <div id="tab-deploy" class="tab-panel">
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3 class="admin-card-title">Deploy Webhook (Cloudflare Pages / Netlify / Vercel)</h3>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="ads-before-content">Kode Iklan Sebelum Konten Artikel</label>
-          <textarea class="form-textarea" id="ads-before-content" rows="3" placeholder="<ins class='adsbygoogle' ...></ins>"></textarea>
+          <label class="form-label" for="deploy-hook-url">Deploy Hook URL</label>
+          <input class="form-input" type="url" id="deploy-hook-url" placeholder="https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/..." />
+          <p class="form-hint">URL webhook yang dipanggil otomatis saat artikel baru di-publish untuk men-trigger build ulang SSG.</p>
         </div>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-        <div class="form-group">
-          <label class="form-label" for="ads-in-content">Kode Iklan Sela Paragraf (In-Content)</label>
-          <textarea class="form-textarea" id="ads-in-content" rows="3" placeholder="<ins class='adsbygoogle' ...></ins>"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="ads-after-content">Kode Iklan Setelah Konten Artikel</label>
-          <textarea class="form-textarea" id="ads-after-content" rows="3" placeholder="<ins class='adsbygoogle' ...></ins>"></textarea>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="ads-footer">Kode Iklan Footer (Bawah)</label>
-        <textarea class="form-textarea" id="ads-footer" rows="3" placeholder="Sticky banner atau responsive ad unit"></textarea>
       </div>
     </div>
 
-    <!-- Custom Scripts -->
-    <div class="admin-card">
-      <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; color: #0f172a;">5. Custom Tracking Scripts</h3>
-      <div class="form-group">
-        <label class="form-label" for="head-scripts">Custom Head Scripts (Google Analytics 4 / Google Tag Manager)</label>
-        <textarea class="form-textarea" id="head-scripts" rows="3" placeholder="<script async src='https://www.googletagmanager.com/gtag/js?id=...'></script>"></textarea>
-      </div>
+    <!-- Tab 5: Custom Scripts -->
+    <div id="tab-scripts" class="tab-panel">
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3 class="admin-card-title">Custom Tracking Scripts</h3>
+        </div>
 
-      <div class="form-group">
-        <label class="form-label" for="body-scripts">Custom Footer / Body Scripts (Meta Pixel / Custom Tracking)</label>
-        <textarea class="form-textarea" id="body-scripts" rows="3" placeholder="<!-- Meta Pixel Code -->"></textarea>
+        <div class="form-group">
+          <label class="form-label" for="head-scripts">Custom Head Scripts (Google Analytics 4 / Google Tag Manager)</label>
+          <textarea class="form-textarea" id="head-scripts" rows="3" placeholder="<script async src='https://www.googletagmanager.com/gtag/js?id=...'></script>"></textarea>
+          <p class="form-hint">Disisipkan tepat sebelum tag penutup <code>&lt;/head&gt;</code>.</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="body-scripts">Custom Body Scripts (Meta Pixel / Live Chat)</label>
+          <textarea class="form-textarea" id="body-scripts" rows="3" placeholder="<!-- Meta Pixel Code -->"></textarea>
+          <p class="form-hint">Disisipkan tepat sebelum tag penutup <code>&lt;/body&gt;</code>.</p>
+        </div>
       </div>
     </div>
 
-    <div style="display: flex; justify-content: flex-end; margin-bottom: 3rem;">
+    <!-- Sticky Bottom Save Bar -->
+    <div class="sticky-save-bar">
+      <span style="font-size: 0.85rem; color: var(--admin-text-muted);">
+        Pastikan perubahan Anda sudah sesuai sebelum menyimpan.
+      </span>
       <button type="submit" id="btn-save-settings" class="btn btn-primary">
         💾 Simpan Semua Pengaturan
       </button>
@@ -150,11 +210,26 @@ import AdminLayout from "@layouts/AdminLayout.astro";
   <script>
     import { getSettings, updateSettings } from "@core/settings/site";
 
+    // Tab Switching Logic
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const tabPanels = document.querySelectorAll(".tab-panel");
+
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const targetTab = (btn as HTMLElement).dataset.tab;
+        tabButtons.forEach((b) => b.classList.remove("active"));
+        tabPanels.forEach((p) => p.classList.remove("active"));
+
+        btn.classList.add("active");
+        const panel = document.getElementById(targetTab || "");
+        if (panel) panel.classList.add("active");
+      });
+    });
+
     const form = document.getElementById("settings-form") as HTMLFormElement;
     const btnSave = document.getElementById("btn-save-settings") as HTMLButtonElement;
-    const feedback = document.getElementById("settings-feedback") as HTMLDivElement;
 
-    // General & SEO inputs
+    // Inputs
     const siteName = document.getElementById("site-name") as HTMLInputElement;
     const siteTagline = document.getElementById("site-tagline") as HTMLInputElement;
     const siteDesc = document.getElementById("site-description") as HTMLTextAreaElement;
@@ -166,7 +241,6 @@ import AdminLayout from "@layouts/AdminLayout.astro";
     const defaultOg = document.getElementById("default-og-image") as HTMLInputElement;
     const deployHook = document.getElementById("deploy-hook-url") as HTMLInputElement;
 
-    // Ads inputs
     const enableAdsArticles = document.getElementById("enable-ads-articles") as HTMLInputElement;
     const enableAdsHomepage = document.getElementById("enable-ads-homepage") as HTMLInputElement;
     const adsInterval = document.getElementById("ads-paragraph-interval") as HTMLInputElement;
@@ -176,7 +250,6 @@ import AdminLayout from "@layouts/AdminLayout.astro";
     const adsAfter = document.getElementById("ads-after-content") as HTMLTextAreaElement;
     const adsFooter = document.getElementById("ads-footer") as HTMLTextAreaElement;
 
-    // Custom scripts
     const headScripts = document.getElementById("head-scripts") as HTMLTextAreaElement;
     const bodyScripts = document.getElementById("body-scripts") as HTMLTextAreaElement;
 
@@ -208,15 +281,14 @@ import AdminLayout from "@layouts/AdminLayout.astro";
           if (data.custom_body_end_scripts) bodyScripts.value = data.custom_body_end_scripts;
         }
       } catch (err) {
-        console.error("Failed to fetch settings:", err);
+        console.error("Failed to load settings:", err);
       }
     }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       btnSave.disabled = true;
-      btnSave.textContent = "Menyimpan pengaturan...";
-      feedback.style.display = "none";
+      btnSave.textContent = "Menyimpan...";
 
       const payload = {
         site_name: siteName.value.trim(),
@@ -245,17 +317,9 @@ import AdminLayout from "@layouts/AdminLayout.astro";
 
       try {
         await updateSettings(payload);
-        feedback.style.display = "block";
-        feedback.style.backgroundColor = "#dcfce7";
-        feedback.style.color = "#166534";
-        feedback.style.border = "1px solid #bbf7d0";
-        feedback.textContent = "✅ Pengaturan situs & slot iklan berhasil disimpan!";
+        (window as any).showToast("Pengaturan website berhasil disimpan!", "success");
       } catch (err: any) {
-        feedback.style.display = "block";
-        feedback.style.backgroundColor = "#fef2f2";
-        feedback.style.color = "#dc2626";
-        feedback.style.border = "1px solid #fecaca";
-        feedback.textContent = "❌ Gagal menyimpan pengaturan: " + (err.message || "Unknown error");
+        (window as any).showToast("Gagal menyimpan: " + (err.message || "Error"), "error");
       } finally {
         btnSave.disabled = false;
         btnSave.textContent = "💾 Simpan Semua Pengaturan";

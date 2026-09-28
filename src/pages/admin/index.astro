@@ -3,70 +3,77 @@ import AdminLayout from "@layouts/AdminLayout.astro";
 ---
 
 <AdminLayout title="Dashboard" activeMenu="dashboard">
-  <!-- Stat Cards -->
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header-info">
+      <h2>Ringkasan Dashboard</h2>
+      <p>Pantau statistik artikel, katalog produk, dan status performa website Anda.</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+      <a href="/admin/posts" class="btn btn-primary btn-sm">+ Tulis Artikel Baru</a>
+      <button id="btn-quick-rebuild" class="btn btn-outline btn-sm">
+        🚀 Trigger Deploy Hook
+      </button>
+    </div>
+  </div>
+
+  <!-- Symmetrical 4-Card Stats Grid -->
   <div class="stats-grid">
-    <div class="admin-card stat-card">
-      <div class="stat-icon" style="background-color: #e0f2fe; color: #0284c7;">📝</div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background-color: #eff6ff; color: #2563eb;">📝</div>
       <div class="stat-info">
         <h3 id="stat-posts">0</h3>
         <p>Total Artikel</p>
       </div>
     </div>
 
-    <div class="admin-card stat-card">
+    <div class="stat-card">
       <div class="stat-icon" style="background-color: #fef3c7; color: #d97706;">📄</div>
       <div class="stat-info">
         <h3 id="stat-drafts">0</h3>
-        <p>Draft</p>
+        <p>Draft Artikel</p>
       </div>
     </div>
 
-    <div class="admin-card stat-card">
+    <div class="stat-card">
       <div class="stat-icon" style="background-color: #dcfce7; color: #16a34a;">🛍️</div>
       <div class="stat-info">
         <h3 id="stat-products">0</h3>
-        <p>Produk / Menu</p>
+        <p>Total Produk</p>
       </div>
     </div>
 
-    <div class="admin-card stat-card">
+    <div class="stat-card">
       <div class="stat-icon" style="background-color: #f3e8ff; color: #9333ea;">⚡</div>
       <div class="stat-info">
         <h3>SSG</h3>
-        <p>Static Engine</p>
+        <p>Astro Engine</p>
       </div>
     </div>
   </div>
 
-  <!-- Action Shortcuts -->
+  <!-- Recent Articles Table -->
   <div class="admin-card">
-    <h2 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;">Aksi Cepat</h2>
-    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-      <a href="/admin/posts" class="btn btn-primary btn-sm">+ Tulis Artikel Baru</a>
-      <a href="/admin/settings" class="btn btn-outline btn-sm">⚙️ Buka Pengaturan</a>
-      <button id="btn-quick-rebuild" class="btn btn-outline btn-sm" style="cursor: pointer;">
-        🚀 Trigger Deploy Webhook
-      </button>
+    <div class="admin-card-header">
+      <h3 class="admin-card-title">Artikel Terbaru</h3>
+      <a href="/admin/posts" style="font-size: 0.825rem; font-weight: 600; color: var(--admin-primary); text-decoration: none;">
+        Lihat Semua &rarr;
+      </a>
     </div>
-    <div id="deploy-feedback" style="margin-top: 0.75rem; font-size: 0.85rem; display: none;"></div>
-  </div>
 
-  <!-- Recent Articles Overview -->
-  <div class="admin-card">
-    <h2 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;">Artikel Terbaru</h2>
-    <div style="overflow-x: auto;">
+    <div class="table-container">
       <table class="admin-table">
         <thead>
           <tr>
-            <th>Judul</th>
+            <th>Judul Artikel</th>
             <th>Kategori</th>
             <th>Status</th>
-            <th>Tanggal</th>
+            <th>Tanggal Publikasi</th>
           </tr>
         </thead>
         <tbody id="posts-table-body">
           <tr>
-            <td colspan="4" style="text-align: center; color: #94a3b8; padding: 2rem;">
+            <td colspan="4" style="text-align: center; color: var(--admin-text-muted); padding: 2.5rem;">
               Memuat data artikel...
             </td>
           </tr>
@@ -75,120 +82,84 @@ import AdminLayout from "@layouts/AdminLayout.astro";
     </div>
   </div>
 
-  <style>
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .stat-card {
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-      margin-bottom: 0;
-    }
-
-    .stat-icon {
-      width: 52px;
-      height: 52px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-    }
-
-    .stat-info h3 {
-      font-size: 1.75rem;
-      font-weight: 800;
-      color: #0f172a;
-      line-height: 1;
-    }
-
-    .stat-info p {
-      font-size: 0.85rem;
-      color: #64748b;
-      margin-top: 0.25rem;
-    }
-
-    .btn-sm {
-      padding: 0.5rem 1rem;
-      font-size: 0.875rem;
-    }
-
-    @media (max-width: 1024px) {
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-  </style>
-
   <script>
     import { getPosts } from "@core/content/posts";
+    import { getProducts } from "@core/content/products";
     import { getSettings, triggerDeployHook } from "@core/settings/site";
     import { formatDate } from "@core/utils/date";
 
     async function loadDashboard() {
       try {
-        const posts = await getPosts();
+        const [posts, products] = await Promise.all([getPosts(), getProducts()]);
         const statPosts = document.getElementById("stat-posts");
         const statDrafts = document.getElementById("stat-drafts");
+        const statProducts = document.getElementById("stat-products");
         const tableBody = document.getElementById("posts-table-body");
 
         const drafts = posts.filter((p) => p.status === "draft");
 
         if (statPosts) statPosts.textContent = posts.length.toString();
         if (statDrafts) statDrafts.textContent = drafts.length.toString();
+        if (statProducts) statProducts.textContent = products.length.toString();
 
         if (tableBody) {
           if (posts.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 2rem;">Belum ada artikel. Klik "Tulis Artikel Baru" untuk memulai.</td></tr>`;
+            tableBody.innerHTML = `
+              <tr>
+                <td colspan="4" style="text-align: center; color: var(--admin-text-muted); padding: 3rem;">
+                  <div style="font-size: 2rem; margin-bottom: 0.5rem;">📝</div>
+                  <p style="font-weight: 600;">Belum ada artikel</p>
+                  <p style="font-size: 0.8rem; margin-top: 0.25rem;">Klik tombol "Tulis Artikel Baru" di atas untuk membuat artikel pertama.</p>
+                </td>
+              </tr>
+            `;
           } else {
             tableBody.innerHTML = posts.slice(0, 5).map((post) => `
               <tr>
-                <td style="font-weight: 600; color: #0f172a;">${post.title}</td>
-                <td><span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">${post.category || "-"}</span></td>
                 <td>
-                  <span style="background: ${post.status === 'published' ? '#dcfce7' : '#fef3c7'}; color: ${post.status === 'published' ? '#166534' : '#92400e'}; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
-                    ${post.status}
+                  <div style="font-weight: 600; color: var(--admin-text-main);">${post.title}</div>
+                  <div style="font-size: 0.75rem; color: var(--admin-text-muted);">/blog/${post.slug}</div>
+                </td>
+                <td><span class="category-tag">${post.category || "Umum"}</span></td>
+                <td>
+                  <span class="status-pill ${post.status === 'published' ? 'published' : 'draft'}">
+                    ${post.status === 'published' ? '● Published' : '○ Draft'}
                   </span>
                 </td>
-                <td style="color: #64748b; font-size: 0.85rem;">${formatDate(post.published_at || post.updated_at)}</td>
+                <td style="color: var(--admin-text-muted); font-size: 0.85rem;">
+                  ${formatDate(post.published_at || post.updated_at)}
+                </td>
               </tr>
             `).join("");
           }
         }
       } catch (e) {
-        console.error("Failed to load dashboard data:", e);
+        console.error("Dashboard error:", e);
       }
     }
 
     const btnDeploy = document.getElementById("btn-quick-rebuild");
-    const deployFeedback = document.getElementById("deploy-feedback");
-
     if (btnDeploy) {
       btnDeploy.addEventListener("click", async () => {
-        if (!confirm("Kirim sinyal Deploy Webhook ke Cloudflare Pages / Netlify?")) return;
-        btnDeploy.textContent = "Mengirim sinyal...";
+        if (!confirm("Kirim sinyal Deploy Webhook ke platform hosting untuk rebuild website?")) return;
+        btnDeploy.textContent = "Mengirim...";
         try {
           const settings = await getSettings();
           if (!settings.deploy_hook_url) {
-            alert("Deploy Hook URL belum diatur di menu Pengaturan Situs!");
-            btnDeploy.textContent = "🚀 Trigger Deploy Webhook";
+            (window as any).showToast("Deploy Hook URL belum diisi di Pengaturan Situs!", "error");
+            btnDeploy.textContent = "🚀 Trigger Deploy Hook";
             return;
           }
           const ok = await triggerDeployHook(settings.deploy_hook_url);
-          if (deployFeedback) {
-            deployFeedback.style.display = "block";
-            deployFeedback.style.color = ok ? "#16a34a" : "#dc2626";
-            deployFeedback.textContent = ok ? "✅ Deploy hook berhasil dikirim! Website sedang di-rebuild." : "❌ Gagal memanggil Deploy hook.";
+          if (ok) {
+            (window as any).showToast("Deploy Webhook berhasil dikirim! Website sedang di-rebuild.", "success");
+          } else {
+            (window as any).showToast("Gagal memanggil Deploy Webhook.", "error");
           }
         } catch {
-          alert("Gagal memanggil Deploy Webhook.");
+          (window as any).showToast("Terjadi kesalahan saat memanggil Deploy Webhook.", "error");
         } finally {
-          btnDeploy.textContent = "🚀 Trigger Deploy Webhook";
+          btnDeploy.textContent = "🚀 Trigger Deploy Hook";
         }
       });
     }
