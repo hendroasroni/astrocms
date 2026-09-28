@@ -24,18 +24,55 @@ try {
   </div>
 
   <div class="container blog-container">
-    {posts.length > 0 ? (
-      <div class="blog-grid">
-        {posts.map((post) => (
-          <ArticleCard post={post} />
-        ))}
-      </div>
-    ) : (
-      <div class="empty-state">
-        <p>Belum ada artikel yang dipublikasikan saat ini. Silakan kunjungi kembali nanti!</p>
-      </div>
-    )}
+    <div class="blog-grid" id="blog-posts-grid" style={posts.length === 0 ? "display: none;" : ""}>
+      {posts.map((post) => (
+        <ArticleCard post={post} />
+      ))}
+    </div>
+    <div class="empty-state" id="blog-empty-state" style={posts.length > 0 ? "display: none;" : ""}>
+      <p>Belum ada artikel yang dipublikasikan saat ini. Silakan kunjungi kembali nanti!</p>
+    </div>
   </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      try {
+        const localData = localStorage.getItem("astrocms_posts");
+        if (localData) {
+          const posts = JSON.parse(localData);
+          const published = posts.filter((p: any) => p.status === "published");
+          const grid = document.getElementById("blog-posts-grid");
+          const empty = document.getElementById("blog-empty-state");
+
+          if (grid && published.length > 0) {
+            grid.style.display = "grid";
+            if (empty) empty.style.display = "none";
+            grid.innerHTML = published.map((post: any) => `
+              <article class="article-card">
+                ${post.image ? `
+                  <a href="/blog/${post.slug}" class="card-media">
+                    <img src="${post.image}" alt="${post.title}" loading="lazy" />
+                  </a>
+                ` : ""}
+                <div class="card-body">
+                  ${post.category ? `<span class="card-category">${post.category}</span>` : ""}
+                  <h3 class="card-title">
+                    <a href="/blog/${post.slug}">${post.title}</a>
+                  </h3>
+                  <p class="card-excerpt">${post.excerpt || ""}</p>
+                  <div class="card-meta">
+                    <time>${post.published_at ? new Date(post.published_at).toLocaleDateString("id-ID", { year: "numeric", month: "short", day: "numeric" }) : ""}</time>
+                  </div>
+                </div>
+              </article>
+            `).join("");
+          }
+        }
+      } catch (e) {
+        console.warn("Blog preview sync:", e);
+      }
+    });
+  </script>
 </BaseLayout>
 
 <style>
