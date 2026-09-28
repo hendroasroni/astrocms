@@ -126,6 +126,8 @@ function handleRequest(e, method) {
 function getSheetData(ss, sheetName) {
   var sheet = ss.getSheetByName(sheetName);
   if (!sheet) return [];
+  if (sheet.getLastRowNum() < 2 || sheet.getLastColumn() < 1) return [];
+
   var data = sheet.getDataRange().getValues();
   if (data.length <= 1) return [];
 
@@ -136,7 +138,6 @@ function getSheetData(ss, sheetName) {
     var row = {};
     for (var j = 0; j < headers.length; j++) {
       var val = data[i][j];
-      // Auto parse JSON if tags or booleans
       if (headers[j] === "tags" && typeof val === "string" && val.startsWith("[")) {
         try { val = JSON.parse(val); } catch(e) {}
       }
@@ -145,7 +146,9 @@ function getSheetData(ss, sheetName) {
       }
       row[headers[j]] = val;
     }
-    rows.push(row);
+    if (row.id) {
+      rows.push(row);
+    }
   }
   return rows;
 }
@@ -154,9 +157,13 @@ function appendRow(ss, sheetName, item) {
   var sheet = ss.getSheetByName(sheetName);
   if (!sheet) {
     sheet = ss.insertSheet(sheetName);
-    var headers = Object.keys(item);
-    sheet.appendRow(headers);
   }
+  
+  if (sheet.getLastColumn() === 0 || sheet.getLastRowNum() === 0) {
+    var initialHeaders = Object.keys(item);
+    sheet.appendRow(initialHeaders);
+  }
+
   var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   var newRow = [];
   for (var i = 0; i < headers.length; i++) {
@@ -170,7 +177,7 @@ function appendRow(ss, sheetName, item) {
 
 function updateRow(ss, sheetName, id, item) {
   var sheet = ss.getSheetByName(sheetName);
-  if (!sheet) return item;
+  if (!sheet || sheet.getLastColumn() === 0) return item;
   var data = sheet.getDataRange().getValues();
   var headers = data[0];
   var idIndex = headers.indexOf("id");
@@ -194,7 +201,7 @@ function updateRow(ss, sheetName, id, item) {
 
 function deleteRow(ss, sheetName, id) {
   var sheet = ss.getSheetByName(sheetName);
-  if (!sheet) return;
+  if (!sheet || sheet.getLastColumn() === 0) return;
   var data = sheet.getDataRange().getValues();
   var headers = data[0];
   var idIndex = headers.indexOf("id");
@@ -209,7 +216,7 @@ function deleteRow(ss, sheetName, id) {
 
 function getSettingsData(ss) {
   var sheet = ss.getSheetByName("settings");
-  if (!sheet) return {};
+  if (!sheet || sheet.getLastRowNum() < 1) return {};
   var data = sheet.getDataRange().getValues();
   var settings = {};
   for (var i = 1; i < data.length; i++) {
@@ -224,7 +231,6 @@ function saveSettingsData(ss, settings) {
   var sheet = ss.getSheetByName("settings");
   if (!sheet) {
     sheet = ss.insertSheet("settings");
-    sheet.appendRow(["key", "value"]);
   }
   sheet.clearContents();
   sheet.appendRow(["key", "value"]);

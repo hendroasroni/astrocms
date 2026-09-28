@@ -330,12 +330,15 @@ import AdminLayout from "@layouts/AdminLayout.astro";
 
     function renderFilteredPosts() {
       if (!postsList) return;
-      const search = searchInput.value.toLowerCase().trim();
-      const status = filterStatus.value;
-      const category = filterCategory.value;
+      const search = (searchInput?.value || "").toLowerCase().trim();
+      const status = filterStatus?.value || "all";
+      const category = filterCategory?.value || "all";
 
-      const filtered = allPosts.filter((p) => {
-        const matchesSearch = p.title.toLowerCase().includes(search) || p.slug.toLowerCase().includes(search);
+      const filtered = (allPosts || []).filter((p) => {
+        if (!p) return false;
+        const title = (p.title || "").toLowerCase();
+        const slug = (p.slug || "").toLowerCase();
+        const matchesSearch = !search || title.includes(search) || slug.includes(search);
         const matchesStatus = status === "all" || p.status === status;
         const matchesCat = category === "all" || (p.category && p.category.toLowerCase() === category.toLowerCase());
         return matchesSearch && matchesStatus && matchesCat;

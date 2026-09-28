@@ -133,10 +133,10 @@ const featuredProducts = [
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       try {
-        const localData = localStorage.getItem("astrocms_posts");
+        const localData = localStorage.getItem("astrocms_posts") || localStorage.getItem("astro_cms_mock_posts");
         if (localData) {
           const posts = JSON.parse(localData);
-          const published = posts.filter((p: any) => p.status === "published").slice(0, 3);
+          const published = (Array.isArray(posts) ? posts : []).filter((p: any) => p && p.status === "published").slice(0, 3);
           const grid = document.getElementById("recent-articles-grid");
           const section = document.getElementById("recent-articles-section");
 

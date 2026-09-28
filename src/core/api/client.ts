@@ -3,12 +3,12 @@ import { getIdToken } from "@core/auth/auth";
 
 const API_URL = import.meta.env.PUBLIC_API_URL || "";
 
-// Default Mock Storage for Demo Mode
-const STORAGE_PREFIX = "astro_cms_mock_";
+// Storage keys for local caching & demo fallback
+const STORAGE_PREFIX = "astrocms_";
 
 function getLocalData<T>(key: string, defaultVal: T): T {
   if (typeof window === "undefined") return defaultVal;
-  const stored = localStorage.getItem(STORAGE_PREFIX + key);
+  const stored = localStorage.getItem(STORAGE_PREFIX + key) || localStorage.getItem("astro_cms_mock_" + key);
   if (!stored) {
     localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(defaultVal));
     return defaultVal;
@@ -23,6 +23,7 @@ function getLocalData<T>(key: string, defaultVal: T): T {
 function setLocalData<T>(key: string, val: T): void {
   if (typeof window !== "undefined") {
     localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(val));
+    localStorage.setItem("astro_cms_mock_" + key, JSON.stringify(val));
   }
 }
 
@@ -55,20 +56,6 @@ const defaultMockPosts: Post[] = [
     updated_at: new Date().toISOString(),
     author: "Chef Ilen",
   },
-  {
-    id: "post-3",
-    title: "Promo Paket Oleh-Oleh Frozen Spesial Akhir Pekan",
-    slug: "promo-paket-oleh-oleh-frozen-spesial",
-    excerpt: "Dapatkan diskon 15% untuk setiap pembelian paket frozen komplit kirim ke seluruh Indonesia.",
-    content: "Khusus pemesanan via WhatsApp minggu ini, nikmati diskon spesial untuk paket 20 pcs dan 30 pcs pempek frozen kemasan vacuum.",
-    image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
-    status: "draft",
-    category: "Promo",
-    tags: ["promo", "diskon", "frozen"],
-    published_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    author: "Marketing Ilen",
-  },
 ];
 
 const defaultMockSettings: SiteSettings = {
@@ -99,9 +86,8 @@ export async function fetchApi<T = any>(
 
   // If no backend API configured, serve Mock LocalStorage Database for instant testing!
   if (!API_URL) {
-    // Artificial small delay for realistic UX feedback
     if (typeof window !== "undefined") {
-      await new Promise((r) => setTimeout(r, 120));
+      await new Promise((r) => setTimeout(r, 80));
     }
 
     if (action === "getPosts") {
@@ -132,8 +118,9 @@ export async function fetchApi<T = any>(
       if (index !== -1) {
         posts[index] = { ...posts[index], ...params.post };
         setLocalData("posts", posts);
+        return { success: true, data: posts[index] as unknown as T };
       }
-      return { success: true, data: posts[index] as unknown as T };
+      return { success: true, data: params.post as unknown as T };
     }
 
     if (action === "deletePost") {
@@ -159,28 +146,54 @@ export async function fetchApi<T = any>(
 
   // Real Google Apps Script fetch
   try {
-    const headers: Record<string, string> = {};
-    if (requiresAuth) {
-      const token = await getIdToken();
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
     if (method === "GET") {
       const queryParams = new URLSearchParams({ action, ...params });
-      const response = await fetch(`${API_URL}?${queryParams.toString()}`, { headers });
-      return await response.json();
+      const response = await fetch(`${API_URL}?${queryParams.toString()}`, {
+        redirect: "follow",
+      });
+      const result = await response.json();
+      
+      // Cache posts locally for offline/instant hydration
+      if (action === "getPosts" && result.success && Array.isArray(result.data)) {
+        setLocalData("posts", result.data);
+      }
+      return result;
     } else {
-      headers["Content-Type"] = "text/plain;charset=utf-8";
       const body = JSON.stringify({ action, ...params });
       const response = await fetch(API_URL, {
         method: "POST",
-        headers,
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8",
+        },
         body,
+        redirect: "follow",
       });
-      return await response.json();
+      const result = await response.json();
+
+      // Sync local storage on mutations
+      if (result.success) {
+        if (action === "createPost" && result.data) {
+          const posts = getLocalData<Post[]>("posts", []);
+          posts.unshift(result.data);
+          setLocalData("posts", posts);
+        } else if (action === "updatePost" && result.data) {
+          const posts = getLocalData<Post[]>("posts", []);
+          const idx = posts.findIndex((p) => p.id === params.id);
+          if (idx !== -1) {
+            posts[idx] = { ...posts[idx], ...params.post };
+            setLocalData("posts", posts);
+          }
+        } else if (action === "deletePost") {
+          let posts = getLocalData<Post[]>("posts", []);
+          posts = posts.filter((p) => p.id !== params.id);
+          setLocalData("posts", posts);
+        }
+      }
+
+      return result;
     }
   } catch (err: any) {
     console.error(`API Error [${action}]:`, err);
-    return { success: false, error: err.message || "Failed to communicate with backend." };
+    return { success: false, error: err.message || "Gagal berkomunikasi dengan backend Google Apps Script." };
   }
 }
