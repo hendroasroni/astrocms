@@ -1,0 +1,268 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { site } from "@config/site";
+import { getProducts } from "@core/content/products";
+import type { Product } from "@core/api/types";
+
+let products: Product[] = [];
+try {
+  const all = await getProducts();
+  products = all.filter((p) => p.status === "published");
+} catch {
+  products = [];
+}
+
+// Default mock products if empty
+if (products.length === 0) {
+  products = [
+    {
+      id: "prod-1",
+      name: "Paket Pempek Kapal Selam Komplit",
+      slug: "paket-pempek-kapal-selam-komplit",
+      description: "3 Kapal Selam Telur Utuh + 2 Lenjer + Cuko Pedas Gurih Mantap.",
+      price: 85000,
+      image: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=600&auto=format&fit=crop&q=80",
+      status: "published",
+      category: "Paket Hemat",
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: "prod-2",
+      name: "Paket Campur Komplit (20 pcs)",
+      slug: "paket-campur-komplit-20-pcs",
+      description: "Adaan, Lenjer, Kulit, Keriting + 2 Botol Cuko Khas Palembang.",
+      price: 120000,
+      discount_price: 105000,
+      image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&auto=format&fit=crop&q=80",
+      status: "published",
+      category: "Paket Keluarga",
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: "prod-3",
+      name: "Pempek Kulit Crispy (10 pcs)",
+      slug: "pempek-kulit-crispy-10-pcs",
+      description: "10 pcs pempek kulit renyah di luar, lembut di dalam lengkap dengan cuko.",
+      price: 50000,
+      image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&auto=format&fit=crop&q=80",
+      status: "published",
+      category: "Satuan / Porsi",
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: "prod-4",
+      name: "Cuko Asli Palembang Botol 500ml",
+      slug: "cuko-asli-palembang-botol-500ml",
+      description: "Cuko kental pekat gula batok Linggau dengan racikan cabai rawit pedas nikmat.",
+      price: 35000,
+      image: "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?w=600&auto=format&fit=crop&q=80",
+      status: "published",
+      category: "Bumbu & Cuko",
+      updated_at: new Date().toISOString(),
+    },
+  ];
+}
+
+function formatRupiah(num: number) {
+  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(num);
+}
+---
+
+<BaseLayout
+  title="Daftar Menu & Produk — Pempek Asli Palembang"
+  description={`Lihat daftar menu lengkap dan paket oleh-oleh ${site.name}. Siap kirim frozen pack ke seluruh Indonesia.`}
+>
+  <div class="container products-page">
+    <header class="products-header">
+      <span class="products-tag">Katalog Pilihan</span>
+      <h1 class="products-title">Menu & Paket Pempek</h1>
+      <p class="products-lead">
+        Dibuat segar setiap hari dengan 100% ikan tenggiri asli. Tersedia siap saji dan kemasan frozen vacuum.
+      </p>
+    </header>
+
+    <div class="products-grid">
+      {products.map((item) => (
+        <div class="catalog-card">
+          <div class="catalog-media">
+            <img src={item.image} alt={item.name} loading="lazy" />
+            {item.discount_price && <span class="discount-badge">Hemat Promo</span>}
+          </div>
+          <div class="catalog-body">
+            <span class="catalog-category">{item.category || "Produk"}</span>
+            <h3 class="catalog-name">{item.name}</h3>
+            <p class="catalog-desc">{item.description}</p>
+            <div class="catalog-price-row">
+              <div>
+                {item.discount_price ? (
+                  <div class="price-discount-wrap">
+                    <span class="price-main">{formatRupiah(item.discount_price)}</span>
+                    <span class="price-strike">{formatRupiah(item.price)}</span>
+                  </div>
+                ) : (
+                  <span class="price-main">{formatRupiah(item.price)}</span>
+                )}
+              </div>
+              {site.contact?.whatsapp && (
+                <a
+                  href={`https://wa.me/${site.contact.whatsapp}?text=Halo%20${encodeURIComponent(site.name)},%20saya%20mau%20pesan%20*${encodeURIComponent(item.name)}*.`}
+                  target="_blank"
+                  rel="noopener"
+                  class="btn btn-primary btn-sm"
+                >
+                  Pesan (WA)
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .products-page {
+    padding: 4rem 1.25rem 6rem;
+  }
+
+  .products-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+  }
+
+  .products-tag {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+
+  .products-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--color-text);
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .products-lead {
+    font-size: 1.1rem;
+    color: var(--color-text-muted);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .catalog-card {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .catalog-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .catalog-media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    background: var(--color-bg-alt);
+    overflow: hidden;
+  }
+
+  .catalog-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .discount-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: #dc2626;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .catalog-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .catalog-category {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin-bottom: 0.35rem;
+  }
+
+  .catalog-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.65rem;
+    color: var(--color-text);
+  }
+
+  .catalog-desc {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    flex: 1;
+  }
+
+  .catalog-price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--color-border);
+    padding-top: 1rem;
+  }
+
+  .price-main {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--color-primary);
+  }
+
+  .price-discount-wrap {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .price-strike {
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    text-decoration: line-through;
+  }
+
+  .btn-sm {
+    padding: 0.45rem 0.95rem;
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 900px) {
+    .products-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

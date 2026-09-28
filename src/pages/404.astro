@@ -1,0 +1,60 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { site } from "@config/site";
+---
+
+<BaseLayout
+  title="404 — Halaman Tidak Ditemukan"
+  description={`Halaman yang Anda cari tidak ditemukan di ${site.name}.`}
+>
+  <div class="container not-found-wrapper">
+    <span class="error-code">404</span>
+    <h1 class="error-title">Halaman Tidak Ditemukan</h1>
+    <p class="error-desc">
+      Mohon maaf, halaman yang Anda cari mungkin telah dipindahkan, diubah namanya, atau tidak tersedia.
+    </p>
+    <div class="error-actions">
+      <a href="/" class="btn btn-primary">&larr; Kembali ke Beranda</a>
+      <a href="/blog" class="btn btn-outline">Baca Artikel</a>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .not-found-wrapper {
+    text-align: center;
+    padding: 6rem 1rem 8rem;
+  }
+
+  .error-code {
+    display: inline-block;
+    font-size: 6rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--color-primary);
+    opacity: 0.85;
+    margin-bottom: 1rem;
+  }
+
+  .error-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: var(--color-text);
+    margin-bottom: 1rem;
+  }
+
+  .error-desc {
+    font-size: 1.05rem;
+    color: var(--color-text-muted);
+    max-width: 500px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.6;
+  }
+
+  .error-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+</style>

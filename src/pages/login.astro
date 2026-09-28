@@ -1,0 +1,277 @@
+---
+import "@styles/global.css";
+import { site } from "@config/site";
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login Admin | {site.name}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="robots" content="noindex, nofollow" />
+    <style>
+      body {
+        background-color: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 1.5rem;
+      }
+      .login-box {
+        background: #ffffff;
+        width: 100%;
+        max-width: 440px;
+        padding: 2.5rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+      }
+      .login-header {
+        text-align: center;
+        margin-bottom: 1.75rem;
+      }
+      .login-header img {
+        margin: 0 auto 0.75rem;
+      }
+      .login-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+      }
+      .login-desc {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin-top: 0.25rem;
+      }
+      .demo-banner {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      .demo-banner-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #1e40af;
+        margin-bottom: 0.35rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+      .demo-banner-content {
+        font-size: 0.8rem;
+        color: #3b82f6;
+        line-height: 1.4;
+      }
+      .demo-btn {
+        width: 100%;
+        padding: 0.6rem;
+        margin-top: 0.75rem;
+        background-color: #2563eb;
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+      }
+      .demo-btn:hover {
+        background-color: #1d4ed8;
+      }
+      .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 1.5rem 0;
+        color: #94a3b8;
+        font-size: 0.8rem;
+      }
+      .divider::before, .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      .divider:not(:empty)::before {
+        margin-right: .5em;
+      }
+      .divider:not(:empty)::after {
+        margin-left: .5em;
+      }
+      .form-group {
+        margin-bottom: 1.25rem;
+      }
+      .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 0.5rem;
+      }
+      .form-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        font-size: 0.95rem;
+        color: #0f172a;
+        transition: border-color 0.15s ease;
+      }
+      .form-input:focus {
+        outline: none;
+        border-color: #ea580c;
+        box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+      }
+      .btn-submit {
+        width: 100%;
+        padding: 0.85rem;
+        background-color: #ea580c;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+        margin-top: 0.5rem;
+      }
+      .btn-submit:hover {
+        background-color: #c2410c;
+      }
+      .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .error-alert {
+        display: none;
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        margin-bottom: 1.25rem;
+      }
+      .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.875rem;
+        color: #64748b;
+      }
+      .back-link:hover {
+        color: #ea580c;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-box">
+      <div class="login-header">
+        <img src="/favicon.svg" alt={site.name} width="48" height="48" />
+        <h1 class="login-title">Admin Login</h1>
+        <p class="login-desc">Masuk ke dashboard manajemen {site.name}</p>
+      </div>
+
+      <!-- Demo Box Info -->
+      <div class="demo-banner">
+        <div class="demo-banner-title">
+          <span>⚡ Mode Uji Coba (Demo Mode)</span>
+        </div>
+        <div class="demo-banner-content">
+          Email: <strong>admin@pempekilen.com</strong><br />
+          Password: <strong>admin123</strong>
+        </div>
+        <button type="button" id="btn-demo-quick" class="demo-btn">
+          🚀 Masuk Instan (1-Klik Demo)
+        </button>
+      </div>
+
+      <div class="divider">atau login manual</div>
+
+      <div id="login-error" class="error-alert"></div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input
+            class="form-input"
+            type="email"
+            id="email"
+            placeholder="admin@pempekilen.com"
+            required
+            autocomplete="email"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input
+            class="form-input"
+            type="password"
+            id="password"
+            placeholder="••••••••"
+            required
+            autocomplete="current-password"
+          />
+        </div>
+
+        <button type="submit" id="btn-login" class="btn-submit">
+          Masuk ke Dashboard
+        </button>
+      </form>
+
+      <a href="/" class="back-link">&larr; Kembali ke Beranda</a>
+    </div>
+
+    <script>
+      import { login, subscribeAuth } from "@core/auth/auth";
+
+      const form = document.getElementById("login-form") as HTMLFormElement;
+      const emailInput = document.getElementById("email") as HTMLInputElement;
+      const passInput = document.getElementById("password") as HTMLInputElement;
+      const errorDiv = document.getElementById("login-error") as HTMLDivElement;
+      const btnLogin = document.getElementById("btn-login") as HTMLButtonElement;
+      const btnDemoQuick = document.getElementById("btn-demo-quick") as HTMLButtonElement;
+
+      // If already logged in, redirect to admin
+      subscribeAuth((user) => {
+        if (user) {
+          window.location.href = "/admin";
+        }
+      });
+
+      async function doLogin(email: string, pass: string) {
+        errorDiv.style.display = "none";
+        btnLogin.disabled = true;
+        btnLogin.textContent = "Memproses...";
+
+        try {
+          await login(email, pass);
+          window.location.href = "/admin";
+        } catch (err: any) {
+          errorDiv.textContent = err.message || "Gagal login. Periksa email dan password Anda.";
+          errorDiv.style.display = "block";
+          btnLogin.disabled = false;
+          btnLogin.textContent = "Masuk ke Dashboard";
+        }
+      }
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        doLogin(emailInput.value.trim(), passInput.value);
+      });
+
+      if (btnDemoQuick) {
+        btnDemoQuick.addEventListener("click", () => {
+          emailInput.value = "admin@pempekilen.com";
+          passInput.value = "admin123";
+          doLogin("admin@pempekilen.com", "admin123");
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,219 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { site } from "@config/site";
+---
+
+<BaseLayout
+  title="Hubungi Kami — Layanan Pelanggan & Pemesanan"
+  description={`Hubungi tim ${site.name} untuk informasi pemesanan, katering, kemitraan, atau pertanyaan seputar produk kami.`}
+>
+  <div class="container contact-page">
+    <header class="contact-header">
+      <span class="contact-tag">Layanan Pelanggan</span>
+      <h1 class="contact-title">Hubungi Kami</h1>
+      <p class="contact-lead">
+        Kami siap melayani Anda dengan sepenuh hati. Silakan hubungi kami melalui saluran berikut:
+      </p>
+    </header>
+
+    <div class="contact-grid">
+      <!-- Info Col -->
+      <div class="contact-info-col">
+        <div class="info-card">
+          <div class="info-icon">💬</div>
+          <div>
+            <h3>WhatsApp Resmi</h3>
+            <p>Respon cepat untuk pemesanan & konsultasi</p>
+            {site.contact?.whatsapp && (
+              <a
+                href={`https://wa.me/${site.contact.whatsapp}?text=Halo%20${encodeURIComponent(site.name)},%20saya%20ingin%20bertanya.`}
+                target="_blank"
+                rel="noopener"
+                class="contact-link"
+              >
+                +{site.contact.whatsapp} &rarr;
+              </a>
+            )}
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon">✉️</div>
+          <div>
+            <h3>Email</h3>
+            <p>Untuk kerjasama, kritik, dan saran</p>
+            {site.contact?.email && (
+              <a href={`mailto:${site.contact.email}`} class="contact-link">
+                {site.contact.email}
+              </a>
+            )}
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon">📍</div>
+          <div>
+            <h3>Alamat & Lokasi</h3>
+            <p>{site.contact?.address || "Jl. Demang Lebar Daun No. 45, Palembang"}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Col -->
+      <div class="contact-form-col">
+        <div class="form-card">
+          <h2>Kirim Pesan Langsung</h2>
+          <form id="contact-form" onsubmit="event.preventDefault(); alert('Terima kasih! Pesan Anda telah diteruskan ke tim kami.');">
+            <div class="form-group">
+              <label class="form-label" for="c-name">Nama Lengkap *</label>
+              <input class="form-input" type="text" id="c-name" required placeholder="Nama Anda" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="c-phone">Nomor WhatsApp *</label>
+              <input class="form-input" type="tel" id="c-phone" required placeholder="08123456789" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="c-message">Pesan / Pertanyaan *</label>
+              <textarea class="form-textarea" id="c-message" rows="4" required placeholder="Tuliskan pesan Anda..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+              Kirim Pesan Sekarang
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .contact-page {
+    padding: 4rem 1.25rem 6rem;
+  }
+
+  .contact-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+  }
+
+  .contact-tag {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+
+  .contact-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--color-text);
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .contact-lead {
+    font-size: 1.1rem;
+    color: var(--color-text-muted);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 3rem;
+  }
+
+  .contact-info-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .info-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
+  .info-icon {
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .info-card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 0.25rem;
+  }
+
+  .info-card p {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .contact-link {
+    color: var(--color-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .contact-link:hover {
+    text-decoration: underline;
+  }
+
+  .form-card {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .form-card h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--color-text);
+  }
+
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #334155;
+  }
+
+  .form-input, .form-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+  }
+
+  .form-input:focus, .form-textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+
+  @media (max-width: 850px) {
+    .contact-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

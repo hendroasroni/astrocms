@@ -1,0 +1,194 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { site } from "@config/site";
+---
+
+<BaseLayout
+  title="Tentang Kami — Profil & Cerita Perjalanan"
+  description={`Pelajari lebih lanjut mengenai sejarah, filosofi, dan komitmen kualitas dari ${site.name}.`}
+>
+  <div class="container-narrow about-page">
+    <header class="about-header">
+      <span class="about-tag">Mengenal Lebih Dekat</span>
+      <h1 class="about-title">Cerita & Filosofi {site.name}</h1>
+      <p class="about-lead">{site.tagline || site.description}</p>
+    </header>
+
+    <div class="about-image-card">
+      <img
+        src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1000&auto=format&fit=crop&q=80"
+        alt={`Dapur dan tim ${site.name}`}
+      />
+    </div>
+
+    <div class="about-body">
+      <h2>Warisan Kuliner Otentik</h2>
+      <p>
+        Berawal dari kecintaan mendalam terhadap kuliner khas Nusantara, <strong>{site.name}</strong> hadir untuk menyajikan hidangan berkualitas terbaik dengan mempertahankan resep otentik turun temurun. Kami percaya bahwa kelezatan sejati berakar dari kejujuran dalam memilih bahan baku.
+      </p>
+      <p>
+        Setiap produk diproses secara higienis menggunakan standar kebersihan tinggi, tanpa tambahan pengawet kimiawi berbahaya, pewarna sintetis, maupun pemutih.
+      </p>
+
+      <h2>Komitmen Kualitas Kami</h2>
+      <div class="values-grid">
+        <div class="value-item">
+          <div class="value-icon">⭐</div>
+          <h3>Bahan Baku Pilihan</h3>
+          <p>Hanya menggunakan bahan segar grade premium langsung dari sumber terpercaya.</p>
+        </div>
+        <div class="value-item">
+          <div class="value-icon">🧼</div>
+          <h3>100% Higienis & Halal</h3>
+          <p>Diproses di dapur modern berstandar sanitasi ketat dan terjamin kehalalannya.</p>
+        </div>
+        <div class="value-item">
+          <div class="value-icon">🚚</div>
+          <h3>Pengiriman Terjamin</h3>
+          <p>Kemasan vacuum freeze berteknologi tinggi menjaga kesegaran hingga ke tangan Anda.</p>
+        </div>
+      </div>
+
+      <div class="cta-box">
+        <h3>Ingin Menikmati Hidangan Kami?</h3>
+        <p>Hubungi tim kami untuk pemesanan langsung, pesanan katering, atau pengiriman oleh-oleh.</p>
+        {site.contact?.whatsapp && (
+          <a
+            href={`https://wa.me/${site.contact.whatsapp}?text=Halo%20${encodeURIComponent(site.name)},%20saya%20ingin%20memesan.`}
+            target="_blank"
+            rel="noopener"
+            class="btn btn-primary"
+          >
+            Hubungi via WhatsApp
+          </a>
+        )}
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .about-page {
+    padding: 4rem 1.25rem 6rem;
+  }
+
+  .about-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .about-tag {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+
+  .about-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--color-text);
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .about-lead {
+    font-size: 1.15rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+  }
+
+  .about-image-card {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 3rem;
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+  }
+
+  .about-image-card img {
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+  }
+
+  .about-body h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--color-text);
+  }
+
+  .about-body p {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #334155;
+    margin-bottom: 1.5rem;
+  }
+
+  .values-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .value-item {
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .value-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .value-item h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+  }
+
+  .value-item p {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    margin-bottom: 0;
+  }
+
+  .cta-box {
+    margin-top: 3.5rem;
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    border: 1px solid #fed7aa;
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    text-align: center;
+  }
+
+  .cta-box h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #7c2d12;
+    margin-bottom: 0.5rem;
+  }
+
+  .cta-box p {
+    color: #9a3412;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .values-grid {
+      grid-template-columns: 1fr;
+    }
+    .about-title {
+      font-size: 2rem;
+    }
+  }
+</style>

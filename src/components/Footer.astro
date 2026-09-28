@@ -1,0 +1,140 @@
+---
+import { site } from "@config/site";
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-col">
+      <div class="footer-brand">
+        <img src="/favicon.svg" alt={site.name} width="28" height="28" />
+        <span class="footer-title">{site.name}</span>
+      </div>
+      <p class="footer-desc">{site.description}</p>
+      {site.contact?.address && (
+        <p class="footer-address">{site.contact.address}</p>
+      )}
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-heading">Navigasi</h4>
+      <ul class="footer-links">
+        <li><a href="/">Beranda</a></li>
+        <li><a href="/products">Produk</a></li>
+        <li><a href="/blog">Artikel & Berita</a></li>
+        <li><a href="/about">Tentang Kami</a></li>
+        <li><a href="/contact">Kontak</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-heading">Hubungi Kami</h4>
+      <ul class="footer-links">
+        {site.contact?.whatsapp && (
+          <li><a href={`https://wa.me/${site.contact.whatsapp}`} target="_blank" rel="noopener">WhatsApp: +{site.contact.whatsapp}</a></li>
+        )}
+        {site.contact?.email && (
+          <li><a href={`mailto:${site.contact.email}`}>Email: {site.contact.email}</a></li>
+        )}
+        {site.socials?.instagram && (
+          <li><a href={site.socials.instagram} target="_blank" rel="noopener">Instagram</a></li>
+        )}
+        {site.socials?.tiktok && (
+          <li><a href={site.socials.tiktok} target="_blank" rel="noopener">TikTok</a></li>
+        )}
+      </ul>
+    </div>
+  </div>
+
+  <div class="container footer-bottom">
+    <p>&copy; {currentYear} {site.name}. All rights reserved.</p>
+    <a href="/login" class="admin-link">Staff Login</a>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background-color: #0f172a;
+    color: #94a3b8;
+    padding-top: 4rem;
+    padding-bottom: 2rem;
+    margin-top: auto;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid #1e293b;
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .footer-title {
+    color: #ffffff;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .footer-desc {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    max-width: 380px;
+  }
+
+  .footer-address {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+
+  .footer-heading {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+  }
+
+  .footer-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    font-size: 0.9rem;
+  }
+
+  .footer-links a:hover {
+    color: #ffffff;
+  }
+
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 2rem;
+    font-size: 0.85rem;
+  }
+
+  .admin-link {
+    color: #475569;
+    font-size: 0.75rem;
+  }
+
+  .admin-link:hover {
+    color: #94a3b8;
+  }
+
+  @media (max-width: 768px) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+</style>

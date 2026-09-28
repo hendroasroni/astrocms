@@ -1,0 +1,269 @@
+---
+import AdminLayout from "@layouts/AdminLayout.astro";
+---
+
+<AdminLayout title="Kelola Produk & Menu" activeMenu="products">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div>
+      <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a;">Katalog Produk / Layanan</h2>
+      <p style="font-size: 0.85rem; color: #64748b;">Kelola daftar menu, paket harga, diskon, dan foto produk.</p>
+    </div>
+    <button id="btn-open-modal" class="btn btn-primary btn-sm">+ Tambah Produk Baru</button>
+  </div>
+
+  <div class="admin-card">
+    <div style="overflow-x: auto;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Produk</th>
+            <th>Kategori</th>
+            <th>Harga</th>
+            <th>Status</th>
+            <th style="text-align: right;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="products-list">
+          <tr>
+            <td colspan="5" style="text-align: center; color: #94a3b8; padding: 2rem;">
+              Memuat data produk...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Form Create/Edit Product -->
+  <div id="product-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; align-items: center; justify-content: center; padding: 1.5rem;">
+    <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; padding: 2rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3 id="modal-title" style="font-size: 1.25rem; font-weight: 700;">Tambah Produk</h3>
+        <button id="btn-close-modal" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+      </div>
+
+      <form id="product-form">
+        <input type="hidden" id="prod-id" />
+
+        <div class="form-group">
+          <label class="form-label" for="prod-name">Nama Produk / Layanan *</label>
+          <input class="form-input" type="text" id="prod-name" required placeholder="Contoh: Paket Pempek Kapal Selam" />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="prod-category">Kategori</label>
+            <input class="form-input" type="text" id="prod-category" placeholder="Paket Hemat / Satuan" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prod-status">Status</label>
+            <select class="form-select" id="prod-status">
+              <option value="published">Published (Tampil)</option>
+              <option value="draft">Draft (Disembunyikan)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="prod-price">Harga Normal (Rp) *</label>
+            <input class="form-input" type="number" id="prod-price" required placeholder="85000" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prod-discount">Harga Promo / Diskon (Rp)</label>
+            <input class="form-input" type="number" id="prod-discount" placeholder="Opsional" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="prod-image">URL Foto Produk</label>
+          <input class="form-input" type="url" id="prod-image" placeholder="https://.../foto-produk.jpg" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="prod-desc">Deskripsi Produk</label>
+          <textarea class="form-textarea" id="prod-desc" rows="3" placeholder="Jelaskan isi paket atau detail menu..."></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+          <button type="button" id="btn-cancel-modal" class="btn btn-outline btn-sm">Batal</button>
+          <button type="submit" id="btn-save-prod" class="btn btn-primary btn-sm">Simpan Produk</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <style>
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+    .action-btn {
+      padding: 0.35rem 0.65rem;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid var(--admin-border);
+      background: #ffffff;
+      margin-left: 0.35rem;
+    }
+    .action-btn:hover {
+      background: #f1f5f9;
+    }
+    .btn-delete {
+      color: #ef4444;
+      border-color: #fecaca;
+    }
+    .btn-delete:hover {
+      background: #fef2f2;
+    }
+  </style>
+
+  <script>
+    import { getProducts, createProduct, updateProduct, deleteProduct } from "@core/content/products";
+    import { slugify } from "@core/utils/slug";
+    import type { Product } from "@core/api/types";
+
+    let allProducts: Product[] = [];
+
+    const productsList = document.getElementById("products-list");
+    const modal = document.getElementById("product-modal");
+    const modalTitle = document.getElementById("modal-title");
+    const btnOpenModal = document.getElementById("btn-open-modal");
+    const btnCloseModal = document.getElementById("btn-close-modal");
+    const btnCancelModal = document.getElementById("btn-cancel-modal");
+    const prodForm = document.getElementById("product-form") as HTMLFormElement;
+    const btnSaveProd = document.getElementById("btn-save-prod") as HTMLButtonElement;
+
+    const prodIdInput = document.getElementById("prod-id") as HTMLInputElement;
+    const prodNameInput = document.getElementById("prod-name") as HTMLInputElement;
+    const prodCategoryInput = document.getElementById("prod-category") as HTMLInputElement;
+    const prodStatusSelect = document.getElementById("prod-status") as HTMLSelectElement;
+    const prodPriceInput = document.getElementById("prod-price") as HTMLInputElement;
+    const prodDiscountInput = document.getElementById("prod-discount") as HTMLInputElement;
+    const prodImageInput = document.getElementById("prod-image") as HTMLInputElement;
+    const prodDescInput = document.getElementById("prod-desc") as HTMLTextAreaElement;
+
+    function formatRupiah(num: number) {
+      return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(num || 0);
+    }
+
+    function openModal(prod?: Product) {
+      if (prod) {
+        if (modalTitle) modalTitle.textContent = "Edit Produk";
+        prodIdInput.value = prod.id;
+        prodNameInput.value = prod.name;
+        prodCategoryInput.value = prod.category || "";
+        prodStatusSelect.value = prod.status || "published";
+        prodPriceInput.value = prod.price?.toString() || "";
+        prodDiscountInput.value = prod.discount_price?.toString() || "";
+        prodImageInput.value = prod.image || "";
+        prodDescInput.value = prod.description || "";
+      } else {
+        if (modalTitle) modalTitle.textContent = "Tambah Produk Baru";
+        prodForm.reset();
+        prodIdInput.value = "";
+      }
+      if (modal) modal.style.display = "flex";
+    }
+
+    function closeModal() {
+      if (modal) modal.style.display = "none";
+    }
+
+    if (btnOpenModal) btnOpenModal.addEventListener("click", () => openModal());
+    if (btnCloseModal) btnCloseModal.addEventListener("click", closeModal);
+    if (btnCancelModal) btnCancelModal.addEventListener("click", closeModal);
+
+    async function loadProducts() {
+      if (!productsList) return;
+      productsList.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 2rem;">Memuat katalog produk...</td></tr>`;
+      try {
+        allProducts = await getProducts();
+        if (allProducts.length === 0) {
+          allProducts = [
+            { id: "prod-1", name: "Paket Pempek Kapal Selam", slug: "paket-pempek-kapal-selam", price: 85000, category: "Paket Hemat", status: "published", description: "3 Kapal Selam + Cuko", image: "", updated_at: new Date().toISOString() },
+            { id: "prod-2", name: "Paket Campur Komplit (20 pcs)", slug: "paket-campur-komplit", price: 120000, discount_price: 105000, category: "Paket Keluarga", status: "published", description: "Adaan, Lenjer, Kulit", image: "", updated_at: new Date().toISOString() },
+          ];
+        }
+
+        productsList.innerHTML = allProducts.map((p) => `
+          <tr>
+            <td style="font-weight: 600; color: #0f172a;">${p.name}</td>
+            <td><span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">${p.category || "-"}</span></td>
+            <td style="font-weight: 700; color: #ea580c;">
+              ${p.discount_price ? `<span style="color: #16a34a;">${formatRupiah(p.discount_price)}</span> <small style="text-decoration: line-through; color: #94a3b8;">${formatRupiah(p.price)}</small>` : formatRupiah(p.price)}
+            </td>
+            <td>
+              <span style="background: ${p.status === 'published' ? '#dcfce7' : '#fef3c7'}; color: ${p.status === 'published' ? '#166534' : '#92400e'}; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
+                ${p.status}
+              </span>
+            </td>
+            <td style="text-align: right;">
+              <button class="action-btn btn-edit" data-id="${p.id}">✏️ Edit</button>
+              <button class="action-btn btn-delete" data-id="${p.id}">🗑️ Hapus</button>
+            </td>
+          </tr>
+        `).join("");
+
+        document.querySelectorAll(".btn-edit").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const id = (btn as HTMLElement).dataset.id;
+            const p = allProducts.find((item) => item.id === id);
+            if (p) openModal(p);
+          });
+        });
+
+        document.querySelectorAll(".btn-delete").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = (btn as HTMLElement).dataset.id;
+            if (confirm("Hapus produk ini?")) {
+              if (id) {
+                await deleteProduct(id);
+                loadProducts();
+              }
+            }
+          });
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    prodForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      btnSaveProd.disabled = true;
+      btnSaveProd.textContent = "Menyimpan...";
+
+      const isEdit = !!prodIdInput.value;
+      const prodData: Partial<Product> = {
+        name: prodNameInput.value.trim(),
+        slug: slugify(prodNameInput.value),
+        category: prodCategoryInput.value.trim(),
+        status: prodStatusSelect.value as "published" | "draft",
+        price: parseFloat(prodPriceInput.value) || 0,
+        discount_price: prodDiscountInput.value ? parseFloat(prodDiscountInput.value) : undefined,
+        image: prodImageInput.value.trim(),
+        description: prodDescInput.value.trim(),
+        updated_at: new Date().toISOString(),
+      };
+
+      try {
+        if (isEdit) {
+          await updateProduct(prodIdInput.value, prodData);
+        } else {
+          await createProduct(prodData);
+        }
+        closeModal();
+        loadProducts();
+      } catch (err: any) {
+        alert("Gagal menyimpan produk: " + (err.message || "Error"));
+      } finally {
+        btnSaveProd.disabled = false;
+        btnSaveProd.textContent = "Simpan Produk";
+      }
+    });
+
+    loadProducts();
+  </script>
+</AdminLayout>

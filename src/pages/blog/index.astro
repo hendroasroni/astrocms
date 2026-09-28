@@ -1,0 +1,93 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import ArticleCard from "@components/ArticleCard.astro";
+import { getPosts } from "@core/content/posts";
+import type { Post } from "@core/api/types";
+
+let posts: Post[] = [];
+try {
+  const allPosts = await getPosts();
+  posts = allPosts.filter((p) => p.status === "published");
+} catch (e) {
+  console.log("Fallback blog list");
+}
+---
+
+<BaseLayout
+  title="Artikel & Resep Kuliner"
+  description="Kumpulan berita, tips, dan informasi menarik seputar pempek dan kuliner Palembang."
+>
+  <div class="container blog-header">
+    <span class="blog-tag">Pusat Informasi</span>
+    <h1 class="blog-title">Artikel & Berita Terbaru</h1>
+    <p class="blog-desc">Temukan berbagai cerita menarik, tips mengolah pempek, dan info promo terkini.</p>
+  </div>
+
+  <div class="container blog-container">
+    {posts.length > 0 ? (
+      <div class="blog-grid">
+        {posts.map((post) => (
+          <ArticleCard post={post} />
+        ))}
+      </div>
+    ) : (
+      <div class="empty-state">
+        <p>Belum ada artikel yang dipublikasikan saat ini. Silakan kunjungi kembali nanti!</p>
+      </div>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .blog-header {
+    text-align: center;
+    padding: 4rem 1rem 3rem;
+  }
+
+  .blog-tag {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+
+  .blog-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--color-text);
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .blog-desc {
+    color: var(--color-text-muted);
+    max-width: 600px;
+    margin: 0 auto;
+    font-size: 1.05rem;
+  }
+
+  .blog-container {
+    padding-bottom: 5rem;
+  }
+
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem;
+    background: var(--color-bg-alt);
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--color-border);
+    color: var(--color-text-muted);
+  }
+
+  @media (max-width: 900px) {
+    .blog-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,93 @@
+---
+import { site } from "@config/site";
+
+const navLinks = [
+  { href: "/", label: "Beranda" },
+  { href: "/products", label: "Menu & Produk" },
+  { href: "/blog", label: "Artikel" },
+  { href: "/about", label: "Tentang Kami" },
+  { href: "/contact", label: "Kontak" },
+];
+---
+
+<header class="site-header">
+  <div class="container header-container">
+    <a href="/" class="brand-logo">
+      <img src="/favicon.svg" alt={site.name} width="32" height="32" />
+      <span>{site.name}</span>
+    </a>
+
+    <nav class="site-nav">
+      {navLinks.map((link) => (
+        <a href={link.href} class="nav-link">{link.label}</a>
+      ))}
+      {site.contact?.whatsapp && (
+        <a
+          href={`https://wa.me/${site.contact.whatsapp}?text=Halo%20${encodeURIComponent(site.name)},%20saya%20ingin%20bertanya.`}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn-primary btn-sm"
+        >
+          Pesan via WhatsApp
+        </a>
+      )}
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(8px);
+    background-color: rgba(255, 255, 255, 0.95);
+  }
+
+  .header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+  }
+
+  .brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--color-text);
+  }
+
+  .site-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .nav-link {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    transition: color 0.15s ease;
+  }
+
+  .nav-link:hover {
+    color: var(--color-primary);
+  }
+
+  .btn-sm {
+    padding: 0.45rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  @media (max-width: 768px) {
+    .site-nav {
+      display: none; /* Mobile nav can be toggled */
+    }
+  }
+</style>

@@ -1,0 +1,71 @@
+---
+import ArticleLayout from "@layouts/ArticleLayout.astro";
+import { getPosts } from "@core/content/posts";
+import { getSettings } from "@core/settings/site";
+import { injectAdsIntoContent } from "@core/utils/ads";
+import type { Post } from "@core/api/types";
+
+export async function getStaticPaths() {
+  try {
+    const posts = await getPosts();
+    const published = posts.filter((p) => p.status === "published");
+    if (published.length === 0) {
+      // Fallback mock post so static build passes cleanly
+      return [
+        {
+          params: { slug: "selamat-datang-di-pempek-ilen" },
+          props: {
+            post: {
+              id: "demo-1",
+              title: "Selamat Datang di Pempek Ilen Palembang",
+              slug: "selamat-datang-di-pempek-ilen",
+              excerpt: "Nikmati kelezatan pempek asli Palembang dengan resep warisan turun temurun sejak 1998.",
+              content: "Pempek Ilen menyajikan berbagai varian pempek berkualitas premium yang dibuat dari 100% daging ikan tenggiri segar tanpa bahan pengawet. Lengkap dengan cuko pedas manis mantap.",
+              image: "/favicon.svg",
+              status: "published",
+              category: "Kuliner",
+              tags: ["pempek", "palembang", "kuliner"],
+              published_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              author: "Admin Pempek Ilen",
+            } as Post,
+          },
+        },
+      ];
+    }
+    return published.map((post) => ({
+      params: { slug: post.slug },
+      props: { post },
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+
+// Fetch ad settings for in-content injection
+let inContentAd = "";
+let paragraphInterval = 2;
+
+try {
+  const settings = await getSettings();
+  inContentAd = settings.ads_in_content || "";
+  paragraphInterval = settings.ads_paragraph_interval || 2;
+} catch {}
+
+const formattedContent = post.content.replace(/\n/g, "<br/>");
+const finalContentWithAds = injectAdsIntoContent(formattedContent, {
+  inContentAd,
+  paragraphInterval,
+  disableAds: post.disable_ads,
+});
+---
+
+<ArticleLayout post={post}>
+  <div set:html={finalContentWithAds} />
+</ArticleLayout>

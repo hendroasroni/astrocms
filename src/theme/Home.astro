@@ -1,0 +1,328 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import ArticleCard from "@components/ArticleCard.astro";
+import { site } from "@config/site";
+import type { Post } from "@core/api/types";
+
+export interface Props {
+  recentPosts?: Post[];
+}
+
+const { recentPosts = [] } = Astro.props;
+
+// Mock featured products if not fetched from sheet
+const featuredProducts = [
+  {
+    name: "Paket Pempek Kapal Selam",
+    price: "Rp 85.000",
+    desc: "3 Kapal Selam Telur Utuh + 2 Lenjer + Cuko Pedas Gurih Mantap.",
+    badge: "Terlaris",
+  },
+  {
+    name: "Paket Campur Komplit (20 pcs)",
+    price: "Rp 120.000",
+    desc: "Adaan, Lenjer, Kulit, Keriting + 2 Botol Cuko Khas Palembang.",
+    badge: "Favorit",
+  },
+  {
+    name: "Pempek Kulit Crispy",
+    price: "Rp 50.000",
+    desc: "10 pcs pempek kulit renyah di luar, lembut di dalam.",
+    badge: "Best Seller",
+  },
+];
+---
+
+<BaseLayout
+  title="Pempek Asli Palembang — Gurih & Cuko Mantap"
+  description={site.description}
+>
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container hero-content">
+      <span class="hero-badge">Cita Rasa Otentik Sejak 1998</span>
+      <h1 class="hero-title">{site.name}</h1>
+      <p class="hero-subtitle">{site.tagline}</p>
+      <div class="hero-actions">
+        {site.contact?.whatsapp && (
+          <a
+            href={`https://wa.me/${site.contact.whatsapp}?text=Halo%20${encodeURIComponent(site.name)},%20saya%20mau%20order%20pempek.`}
+            target="_blank"
+            rel="noopener"
+            class="btn btn-primary"
+          >
+            Pesan Sekarang (WhatsApp)
+          </a>
+        )}
+        <a href="#menu" class="btn btn-outline">Lihat Menu Lengkap</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Value Props -->
+  <section class="features-section">
+    <div class="container features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🐟</div>
+        <h3>100% Ikan Tenggiri Asli</h3>
+        <p>Tanpa bahan pengawet dan pewarna buatan. Ikan segar pilihan langsung dari perairan Palembang.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌶️</div>
+        <h3>Cuko Gula Batok Linggau</h3>
+        <p>Racikan cuko otentik kental, asam segar cabai rawit pilihan dan manis pekat gula batok asli.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📦</div>
+        <h3>Vacuum Pack & Higienis</h3>
+        <p>Dikemas kedap udara dengan teknologi vacuum freezing. Aman dikirim ke seluruh Indonesia.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Products / Menu -->
+  <section id="menu" class="menu-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Menu Pilihan</span>
+        <h2 class="section-title">Paket Pempek Terfavorit</h2>
+        <p class="section-desc">Pilihan paket hemat siap santap atau frozen untuk oleh-oleh keluarga tercinta.</p>
+      </div>
+
+      <div class="products-grid">
+        {featuredProducts.map((item) => (
+          <div class="product-card">
+            <span class="product-badge">{item.badge}</span>
+            <h3 class="product-name">{item.name}</h3>
+            <p class="product-desc">{item.desc}</p>
+            <div class="product-footer">
+              <span class="product-price">{item.price}</span>
+              {site.contact?.whatsapp && (
+                <a
+                  href={`https://wa.me/${site.contact.whatsapp}?text=Halo,%20saya%20mau%20pesan%20${encodeURIComponent(item.name)}.`}
+                  target="_blank"
+                  rel="noopener"
+                  class="btn btn-primary btn-sm"
+                >
+                  Beli
+                </a>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Articles -->
+  {recentPosts.length > 0 && (
+    <section class="articles-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">Blog & Resep</span>
+          <h2 class="section-title">Artikel Terbaru Seputar Kuliner</h2>
+        </div>
+
+        <div class="articles-grid">
+          {recentPosts.map((post) => (
+            <ArticleCard post={post} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+</BaseLayout>
+
+<style>
+  /* Hero */
+  .hero-section {
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    padding: 6rem 0 5rem;
+    text-align: center;
+    border-bottom: 1px solid #fed7aa;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background-color: var(--color-primary);
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.35rem 1rem;
+    border-radius: var(--radius-full);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    color: #431407;
+    margin-bottom: 1rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.25rem;
+    color: #7c2d12;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  /* Features */
+  .features-section {
+    padding: 5rem 0;
+    background-color: #ffffff;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+  }
+
+  .feature-card {
+    text-align: center;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+  }
+
+  .feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .feature-card h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--color-text);
+  }
+
+  .feature-card p {
+    font-size: 0.925rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+  }
+
+  /* Menu */
+  .menu-section {
+    padding: 5rem 0;
+    background-color: #fafafa;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+  }
+
+  .section-tag {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+
+  .section-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: var(--color-text);
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .section-desc {
+    color: var(--color-text-muted);
+    max-width: 550px;
+    margin: 0 auto;
+    font-size: 1rem;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .product-card {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1.75rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .product-badge {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .product-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    padding-right: 4rem;
+  }
+
+  .product-desc {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    flex: 1;
+  }
+
+  .product-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--color-border);
+    padding-top: 1.25rem;
+  }
+
+  .product-price {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--color-primary);
+  }
+
+  /* Articles */
+  .articles-section {
+    padding: 5rem 0;
+  }
+
+  .articles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  @media (max-width: 900px) {
+    .features-grid, .products-grid, .articles-grid {
+      grid-template-columns: 1fr;
+    }
+    .hero-title {
+      font-size: 2.5rem;
+    }
+  }
+</style>

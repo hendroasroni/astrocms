@@ -1,0 +1,66 @@
+---
+import { getSettings } from "@core/settings/site";
+
+export interface Props {
+  position: "header" | "before_content" | "in_content" | "after_content" | "footer";
+  disabled?: boolean;
+  className?: string;
+}
+
+const { position, disabled = false, className = "" } = Astro.props;
+
+let adCode = "";
+let isEnabled = true;
+
+if (!disabled) {
+  try {
+    const settings = await getSettings();
+    isEnabled = settings.enable_ads_articles !== false; // Default true if not explicitly disabled
+    
+    if (isEnabled) {
+      if (position === "header") adCode = settings.ads_header || "";
+      else if (position === "before_content") adCode = settings.ads_before_content || "";
+      else if (position === "in_content") adCode = settings.ads_in_content || "";
+      else if (position === "after_content") adCode = settings.ads_after_content || "";
+      else if (position === "footer") adCode = settings.ads_footer || "";
+    }
+  } catch {
+    adCode = "";
+  }
+}
+---
+
+{!disabled && isEnabled && adCode && adCode.trim() !== "" ? (
+  <div class={`ad-slot ad-slot-${position} ${className}`}>
+    <div class="ad-label">Sponsor / Iklan</div>
+    <div class="ad-content" set:html={adCode} />
+  </div>
+) : null}
+
+<style>
+  .ad-slot {
+    margin: 2rem 0;
+    text-align: center;
+    background: #f8fafc;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    overflow: hidden;
+  }
+
+  .ad-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-light);
+    margin-bottom: 0.5rem;
+  }
+
+  .ad-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50px;
+  }
+</style>

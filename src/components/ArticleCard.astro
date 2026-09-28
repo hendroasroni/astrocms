@@ -1,0 +1,110 @@
+---
+import type { Post } from "@core/api/types";
+import { formatDate } from "@core/utils/date";
+
+export interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+---
+
+<article class="article-card">
+  {post.image && (
+    <a href={`/blog/${post.slug}`} class="card-media">
+      <img src={post.image} alt={post.title} loading="lazy" />
+    </a>
+  )}
+  <div class="card-body">
+    {post.category && (
+      <span class="card-category">{post.category}</span>
+    )}
+    <h3 class="card-title">
+      <a href={`/blog/${post.slug}`}>{post.title}</a>
+    </h3>
+    <p class="card-excerpt">{post.excerpt}</p>
+    <div class="card-meta">
+      <time datetime={post.published_at}>{formatDate(post.published_at)}</time>
+    </div>
+  </div>
+</article>
+
+<style>
+  .article-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .article-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .card-media {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: var(--color-bg-alt);
+    overflow: hidden;
+  }
+
+  .card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .article-card:hover .card-media img {
+    transform: scale(1.03);
+  }
+
+  .card-body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .card-category {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .card-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 0.65rem;
+  }
+
+  .card-title a:hover {
+    color: var(--color-primary);
+  }
+
+  .card-excerpt {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-meta {
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    border-top: 1px solid var(--color-border);
+    padding-top: 0.75rem;
+  }
+</style>

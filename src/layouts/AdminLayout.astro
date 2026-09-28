@@ -1,0 +1,107 @@
+---
+import "@styles/admin.css";
+import { site } from "@config/site";
+
+export interface Props {
+  title?: string;
+  activeMenu?: "dashboard" | "posts" | "pages" | "products" | "settings";
+}
+
+const { title = "Admin Panel", activeMenu = "dashboard" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} | {site.name} Admin</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="robots" content="noindex, nofollow" />
+  </head>
+  <body>
+    <!-- Anti-FOUC Loading Screen -->
+    <div id="auth-skeleton" class="skeleton-screen">
+      <div class="spinner"></div>
+      <p style="color: #64748b; font-size: 0.9rem; font-weight: 500;">Memeriksa sesi login admin...</p>
+    </div>
+
+    <!-- Admin App Wrapper (Initially hidden) -->
+    <div id="admin-app" class="admin-layout" style="display: none;">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar-header">
+          <img src="/favicon.svg" alt={site.name} width="28" height="28" />
+          <h2>CMS Admin</h2>
+        </div>
+
+        <nav class="admin-nav">
+          <a href="/admin" class={`admin-nav-item ${activeMenu === "dashboard" ? "active" : ""}`}>
+            <span>📊 Dashboard</span>
+          </a>
+          <a href="/admin/posts" class={`admin-nav-item ${activeMenu === "posts" ? "active" : ""}`}>
+            <span>📝 Kelola Artikel</span>
+          </a>
+          <a href="/admin/pages" class={`admin-nav-item ${activeMenu === "pages" ? "active" : ""}`}>
+            <span>📄 Kelola Halaman</span>
+          </a>
+          <a href="/admin/products" class={`admin-nav-item ${activeMenu === "products" ? "active" : ""}`}>
+            <span>🛍️ Kelola Produk</span>
+          </a>
+          <a href="/admin/settings" class={`admin-nav-item ${activeMenu === "settings" ? "active" : ""}`}>
+            <span>⚙️ Pengaturan Situs</span>
+          </a>
+
+          <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid #1e293b;">
+            <a href="/" target="_blank" class="admin-nav-item">
+              <span>🌐 Lihat Website</span>
+            </a>
+            <button id="btn-logout" class="admin-nav-item" style="width: 100%; border: none; background: transparent; text-align: left; cursor: pointer;">
+              <span>🚪 Logout</span>
+            </button>
+          </div>
+        </nav>
+      </aside>
+
+      <!-- Main Content Area -->
+      <div class="admin-main">
+        <header class="admin-topbar">
+          <h1 style="font-size: 1.25rem; font-weight: 700; color: #0f172a;">{title}</h1>
+          <div id="user-display" style="font-size: 0.85rem; color: #64748b; font-weight: 500;"></div>
+        </header>
+
+        <main class="admin-content">
+          <slot />
+        </main>
+      </div>
+    </div>
+
+    <script>
+      import { subscribeAuth, logout } from "@core/auth/auth";
+
+      const skeleton = document.getElementById("auth-skeleton");
+      const app = document.getElementById("admin-app");
+      const userDisplay = document.getElementById("user-display");
+      const btnLogout = document.getElementById("btn-logout");
+
+      subscribeAuth((user) => {
+        if (!user) {
+          window.location.href = "/login";
+        } else {
+          if (userDisplay) userDisplay.textContent = user.email || "Admin";
+          if (skeleton) skeleton.style.display = "none";
+          if (app) app.style.display = "flex";
+        }
+      });
+
+      if (btnLogout) {
+        btnLogout.addEventListener("click", async () => {
+          if (confirm("Apakah Anda yakin ingin logout?")) {
+            await logout();
+            window.location.href = "/login";
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,95 @@
+---
+import { site } from "@config/site";
+
+export interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  canonical?: string;
+  type?: "website" | "article";
+  publishedTime?: string;
+  modifiedTime?: string;
+  author?: string;
+}
+
+const {
+  title,
+  description = site.description,
+  image = "/favicon.svg",
+  canonical = Astro.url.href,
+  type = "website",
+  publishedTime,
+  modifiedTime,
+  author = site.author,
+} = Astro.props;
+
+const siteTitle = title ? `${title} | ${site.name}` : `${site.name} — ${site.tagline || site.description}`;
+const fullImageUrl = image.startsWith("http") ? image : new URL(image, Astro.site || site.url).href;
+
+// Schema.org JSON-LD
+const schema = type === "article"
+  ? {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: title || site.name,
+      description: description,
+      image: [fullImageUrl],
+      datePublished: publishedTime || new Date().toISOString(),
+      dateModified: modifiedTime || publishedTime || new Date().toISOString(),
+      author: {
+        "@type": "Person",
+        name: author,
+      },
+      publisher: {
+        "@type": "Organization",
+        name: site.name,
+        logo: {
+          "@type": "ImageObject",
+          url: new URL("/favicon.svg", site.url).href,
+        },
+      },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": canonical,
+      },
+    }
+  : {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: site.name,
+      url: site.url,
+      description: description,
+    };
+---
+
+<!-- Global Metadata -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="canonical" href={canonical} />
+
+<!-- Primary Meta Tags -->
+<title>{siteTitle}</title>
+<meta name="title" content={siteTitle} />
+<meta name="description" content={description} />
+<meta name="author" content={author} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonical} />
+<meta property="og:title" content={siteTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={fullImageUrl} />
+<meta property="og:site_name" content={site.name} />
+{publishedTime && <meta property="article:published_time" content={publishedTime} />}
+{modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={canonical} />
+<meta name="twitter:title" content={siteTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={fullImageUrl} />
+
+<!-- JSON-LD Structured Data -->
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

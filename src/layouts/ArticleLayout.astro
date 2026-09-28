@@ -1,0 +1,180 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import AdSlot from "@components/AdSlot.astro";
+import type { Post } from "@core/api/types";
+import { formatDate } from "@core/utils/date";
+
+export interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+---
+
+<BaseLayout
+  title={post.seo_title || post.title}
+  description={post.seo_description || post.excerpt}
+  image={post.image}
+  type="article"
+  publishedTime={post.published_at}
+  modifiedTime={post.updated_at}
+>
+  <article class="article-page container-narrow">
+    <header class="article-header">
+      {post.category && (
+        <a href={`/blog?category=${encodeURIComponent(post.category)}`} class="article-category">
+          {post.category}
+        </a>
+      )}
+      <h1 class="article-headline">{post.title}</h1>
+      <div class="article-metadata">
+        <span>Dipublikasikan pada {formatDate(post.published_at)}</span>
+        {post.author && <span>Oleh {post.author}</span>}
+      </div>
+    </header>
+
+    {post.image && (
+      <div class="article-featured-image">
+        <img src={post.image} alt={post.title} />
+      </div>
+    )}
+
+    <!-- Top Ad Slot (Before Content) -->
+    <AdSlot position="before_content" disabled={post.disable_ads} />
+
+    <div class="article-prose">
+      <slot />
+    </div>
+
+    <!-- Bottom Ad Slot (After Content) -->
+    <AdSlot position="after_content" disabled={post.disable_ads} />
+
+    {post.tags && post.tags.length > 0 && (
+      <footer class="article-footer">
+        <div class="article-tags">
+          <span class="tags-label">Tags:</span>
+          {post.tags.map((tag) => (
+            <span class="tag-badge">#{tag.trim()}</span>
+          ))}
+        </div>
+      </footer>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .article-page {
+    padding-top: 3.5rem;
+    padding-bottom: 5rem;
+  }
+
+  .article-header {
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .article-category {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    margin-bottom: 1rem;
+  }
+
+  .article-headline {
+    font-size: 2.25rem;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+    color: var(--color-text);
+  }
+
+  .article-metadata {
+    display: flex;
+    justify-content: center;
+    gap: 1.25rem;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  .article-featured-image {
+    margin-bottom: 2.5rem;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--color-bg-alt);
+  }
+
+  .article-featured-image img {
+    width: 100%;
+    max-height: 450px;
+    object-fit: cover;
+  }
+
+  .article-prose {
+    font-size: 1.125rem;
+    line-height: 1.8;
+    color: #334155;
+  }
+
+  .article-prose :global(p) {
+    margin-bottom: 1.5rem;
+  }
+
+  .article-prose :global(h2) {
+    font-size: 1.65rem;
+    font-weight: 700;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--color-text);
+  }
+
+  .article-prose :global(h3) {
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    color: var(--color-text);
+  }
+
+  .article-prose :global(ul), .article-prose :global(ol) {
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+  }
+
+  .article-prose :global(li) {
+    margin-bottom: 0.5rem;
+  }
+
+  .article-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .article-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .tags-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+
+  .tag-badge {
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+</style>

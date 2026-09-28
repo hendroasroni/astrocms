@@ -1,0 +1,325 @@
+---
+import AdminLayout from "@layouts/AdminLayout.astro";
+---
+
+<AdminLayout title="Kelola Artikel" activeMenu="posts">
+  <!-- Top Bar Action -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div>
+      <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a;">Daftar Artikel</h2>
+      <p style="font-size: 0.85rem; color: #64748b;">Kelola postingan, konten blog, slot iklan, dan SEO metadata.</p>
+    </div>
+    <button id="btn-open-modal" class="btn btn-primary btn-sm">+ Buat Artikel Baru</button>
+  </div>
+
+  <!-- Articles Table Card -->
+  <div class="admin-card">
+    <div style="overflow-x: auto;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Judul</th>
+            <th>Kategori</th>
+            <th>Status</th>
+            <th>Iklan</th>
+            <th>Tanggal</th>
+            <th style="text-align: right;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="posts-list">
+          <tr>
+            <td colspan="6" style="text-align: center; color: #94a3b8; padding: 2rem;">
+              Memuat data artikel dari database...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Form Create / Edit Post -->
+  <div id="post-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; align-items: center; justify-content: center; padding: 1.5rem;">
+    <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 720px; max-height: 90vh; overflow-y: auto; padding: 2rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3 id="modal-title" style="font-size: 1.25rem; font-weight: 700;">Buat Artikel Baru</h3>
+        <button id="btn-close-modal" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+      </div>
+
+      <form id="post-form">
+        <input type="hidden" id="post-id" />
+
+        <div class="form-group">
+          <label class="form-label" for="post-title">Judul Artikel *</label>
+          <input class="form-input" type="text" id="post-title" required placeholder="Contoh: Resep Pempek Kapal Selam Lembut" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="post-slug">Slug URL (Otomatis)</label>
+          <input class="form-input" type="text" id="post-slug" required placeholder="resep-pempek-kapal-selam-lembut" />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="post-category">Kategori</label>
+            <input class="form-input" type="text" id="post-category" placeholder="Kuliner / Berita / Promo" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="post-status">Status Publikasi</label>
+            <select class="form-select" id="post-status">
+              <option value="published">Published (Tayang)</option>
+              <option value="draft">Draft (Konsep)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="post-image">Featured Image URL</label>
+          <input class="form-input" type="url" id="post-image" placeholder="https://res.cloudinary.com/... atau link R2/Firebase" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="post-excerpt">Ringkasan Singkat (Excerpt)</label>
+          <textarea class="form-textarea" id="post-excerpt" rows="2" placeholder="Ringkasan 1-2 kalimat untuk meta deskripsi dan kartu artikel."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="post-content">Konten Artikel (Markdown / Teks) *</label>
+          <textarea class="form-textarea" id="post-content" rows="8" required placeholder="Tulis isi artikel di sini... (Ketik <!-- ad --> di mana pun Anda ingin memasang iklan manual)"></textarea>
+          <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">Tips: Anda bisa menyisipkan tag <code>&lt;!-- ad --&gt;</code> untuk posisi iklan kustom.</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="post-tags">Tags (Pisahkan dengan koma)</label>
+          <input class="form-input" type="text" id="post-tags" placeholder="pempek, kuliner, palembang" />
+        </div>
+
+        <!-- Exclude Ads Checkbox -->
+        <div style="background: #f8fafc; border: 1px solid var(--admin-border); border-radius: 8px; padding: 1rem; margin-top: 1.25rem;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+            <input type="checkbox" id="post-disable-ads" />
+            Nonaktifkan Semua Iklan pada artikel ini (Exclude Ads)
+          </label>
+          <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem; margin-left: 1.5rem;">Centang jika artikel ini adalah pengumuman resmi, berita duka, atau tidak ingin ditimpa iklan.</p>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+          <button type="button" id="btn-cancel-modal" class="btn btn-outline btn-sm">Batal</button>
+          <button type="submit" id="btn-save-post" class="btn btn-primary btn-sm">Simpan Artikel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <style>
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+    .action-btn {
+      padding: 0.35rem 0.65rem;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid var(--admin-border);
+      background: #ffffff;
+      margin-left: 0.35rem;
+    }
+    .action-btn:hover {
+      background: #f1f5f9;
+    }
+    .btn-delete {
+      color: #ef4444;
+      border-color: #fecaca;
+    }
+    .btn-delete:hover {
+      background: #fef2f2;
+    }
+  </style>
+
+  <script>
+    import { getPosts, createPost, updatePost, deletePost } from "@core/content/posts";
+    import { slugify } from "@core/utils/slug";
+    import { formatDate } from "@core/utils/date";
+    import { getSettings, triggerDeployHook, pingIndexNow } from "@core/settings/site";
+    import { site } from "@config/site";
+    import type { Post } from "@core/api/types";
+
+    let allPosts: Post[] = [];
+
+    const postsList = document.getElementById("posts-list");
+    const modal = document.getElementById("post-modal");
+    const modalTitle = document.getElementById("modal-title");
+    const btnOpenModal = document.getElementById("btn-open-modal");
+    const btnCloseModal = document.getElementById("btn-close-modal");
+    const btnCancelModal = document.getElementById("btn-cancel-modal");
+    const postForm = document.getElementById("post-form") as HTMLFormElement;
+    const btnSavePost = document.getElementById("btn-save-post") as HTMLButtonElement;
+
+    // Form inputs
+    const postIdInput = document.getElementById("post-id") as HTMLInputElement;
+    const postTitleInput = document.getElementById("post-title") as HTMLInputElement;
+    const postSlugInput = document.getElementById("post-slug") as HTMLInputElement;
+    const postCategoryInput = document.getElementById("post-category") as HTMLInputElement;
+    const postStatusSelect = document.getElementById("post-status") as HTMLSelectElement;
+    const postImageInput = document.getElementById("post-image") as HTMLInputElement;
+    const postExcerptInput = document.getElementById("post-excerpt") as HTMLTextAreaElement;
+    const postContentInput = document.getElementById("post-content") as HTMLTextAreaElement;
+    const postTagsInput = document.getElementById("post-tags") as HTMLInputElement;
+    const postDisableAds = document.getElementById("post-disable-ads") as HTMLInputElement;
+
+    // Auto-generate slug from title
+    postTitleInput.addEventListener("input", () => {
+      if (!postIdInput.value) {
+        postSlugInput.value = slugify(postTitleInput.value);
+      }
+    });
+
+    function openModal(post?: Post) {
+      if (post) {
+        if (modalTitle) modalTitle.textContent = "Edit Artikel";
+        postIdInput.value = post.id;
+        postTitleInput.value = post.title;
+        postSlugInput.value = post.slug;
+        postCategoryInput.value = post.category || "";
+        postStatusSelect.value = post.status || "published";
+        postImageInput.value = post.image || "";
+        postExcerptInput.value = post.excerpt || "";
+        postContentInput.value = post.content || "";
+        postTagsInput.value = Array.isArray(post.tags) ? post.tags.join(", ") : (post.tags || "");
+        postDisableAds.checked = !!post.disable_ads;
+      } else {
+        if (modalTitle) modalTitle.textContent = "Buat Artikel Baru";
+        postForm.reset();
+        postIdInput.value = "";
+        postDisableAds.checked = false;
+      }
+      if (modal) modal.style.display = "flex";
+    }
+
+    function closeModal() {
+      if (modal) modal.style.display = "none";
+    }
+
+    if (btnOpenModal) btnOpenModal.addEventListener("click", () => openModal());
+    if (btnCloseModal) btnCloseModal.addEventListener("click", closeModal);
+    if (btnCancelModal) btnCancelModal.addEventListener("click", closeModal);
+
+    async function loadPosts() {
+      if (!postsList) return;
+      postsList.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 2rem;">Memuat artikel...</td></tr>`;
+      try {
+        allPosts = await getPosts();
+        if (allPosts.length === 0) {
+          postsList.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 2rem;">Belum ada artikel. Klik tombol di atas untuk membuat artikel pertama!</td></tr>`;
+          return;
+        }
+
+        postsList.innerHTML = allPosts.map((post) => `
+          <tr>
+            <td>
+              <div style="font-weight: 600; color: #0f172a;">${post.title}</div>
+              <div style="font-size: 0.75rem; color: #94a3b8;">/blog/${post.slug}</div>
+            </td>
+            <td><span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">${post.category || "-"}</span></td>
+            <td>
+              <span style="background: ${post.status === 'published' ? '#dcfce7' : '#fef3c7'}; color: ${post.status === 'published' ? '#166534' : '#92400e'}; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
+                ${post.status}
+              </span>
+            </td>
+            <td>
+              <span style="font-size: 0.8rem; color: ${post.disable_ads ? '#ef4444' : '#10b981'}; font-weight: 600;">
+                ${post.disable_ads ? "🚫 Off" : "✅ On"}
+              </span>
+            </td>
+            <td style="font-size: 0.85rem; color: #64748b;">${formatDate(post.published_at || post.updated_at)}</td>
+            <td style="text-align: right;">
+              <button class="action-btn btn-edit" data-id="${post.id}">✏️ Edit</button>
+              <button class="action-btn btn-delete" data-id="${post.id}">🗑️ Hapus</button>
+            </td>
+          </tr>
+        `).join("");
+
+        // Attach event listeners to buttons
+        document.querySelectorAll(".btn-edit").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const id = (btn as HTMLElement).dataset.id;
+            const post = allPosts.find((p) => p.id === id);
+            if (post) openModal(post);
+          });
+        });
+
+        document.querySelectorAll(".btn-delete").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = (btn as HTMLElement).dataset.id;
+            if (confirm("Apakah Anda yakin ingin menghapus artikel ini?")) {
+              if (id) {
+                await deletePost(id);
+                loadPosts();
+              }
+            }
+          });
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    postForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      btnSavePost.disabled = true;
+      btnSavePost.textContent = "Menyimpan...";
+
+      const isEdit = !!postIdInput.value;
+      const tagsArray = postTagsInput.value
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+
+      const postData: Partial<Post> = {
+        title: postTitleInput.value.trim(),
+        slug: postSlugInput.value.trim() || slugify(postTitleInput.value),
+        category: postCategoryInput.value.trim(),
+        status: postStatusSelect.value as "published" | "draft",
+        image: postImageInput.value.trim(),
+        excerpt: postExcerptInput.value.trim(),
+        content: postContentInput.value,
+        tags: tagsArray,
+        disable_ads: postDisableAds.checked,
+        updated_at: new Date().toISOString(),
+      };
+
+      try {
+        if (isEdit) {
+          await updatePost(postIdInput.value, postData);
+        } else {
+          postData.published_at = new Date().toISOString();
+          await createPost(postData);
+        }
+
+        // Trigger Instant Indexing & Deploy Hook if published
+        if (postData.status === "published") {
+          try {
+            const settings = await getSettings();
+            if (settings.deploy_hook_url) triggerDeployHook(settings.deploy_hook_url);
+            if (settings.indexnow_key) {
+              const fullUrl = `${site.url}/blog/${postData.slug}`;
+              pingIndexNow(new URL(site.url).host, settings.indexnow_key, [fullUrl]);
+            }
+          } catch (hookErr) {
+            console.warn("Deploy hook / IndexNow background trigger error:", hookErr);
+          }
+        }
+
+        closeModal();
+        loadPosts();
+      } catch (err: any) {
+        alert("Gagal menyimpan artikel: " + (err.message || "Unknown error"));
+      } finally {
+        btnSavePost.disabled = false;
+        btnSavePost.textContent = "Simpan Artikel";
+      }
+    });
+
+    loadPosts();
+  </script>
+</AdminLayout>

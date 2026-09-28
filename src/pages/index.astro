@@ -1,0 +1,14 @@
+---
+import Home from "@theme/Home.astro";
+import { getPosts } from "@core/content/posts";
+
+let recentPosts = [];
+try {
+  const posts = await getPosts();
+  recentPosts = posts.filter((p) => p.status === "published").slice(0, 3);
+} catch (e) {
+  console.log("Using static fallback for homepage posts.");
+}
+---
+
+<Home recentPosts={recentPosts} />

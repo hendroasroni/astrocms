@@ -1,0 +1,267 @@
+---
+import AdminLayout from "@layouts/AdminLayout.astro";
+---
+
+<AdminLayout title="Pengaturan Situs" activeMenu="settings">
+  <div style="margin-bottom: 1.5rem;">
+    <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a;">Pengaturan Website</h2>
+    <p style="font-size: 0.85rem; color: #64748b;">Kelola informasi situs, SEO, Deploy Hook, IndexNow, dan manajemen slot iklan.</p>
+  </div>
+
+  <div id="settings-feedback" style="display: none; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem;"></div>
+
+  <form id="settings-form">
+    <!-- General Settings -->
+    <div class="admin-card">
+      <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; color: #0f172a;">1. Informasi Umum</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label" for="site-name">Nama Website</label>
+          <input class="form-input" type="text" id="site-name" placeholder="Pempek Ilen" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="site-tagline">Tagline Situs</label>
+          <input class="form-input" type="text" id="site-tagline" placeholder="Gurih, Lembut, dan Asli Palembang" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="site-description">Deskripsi Singkat Situs</label>
+        <textarea class="form-textarea" id="site-description" rows="2" placeholder="Deskripsi untuk ringkasan dan meta SEO umum."></textarea>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label" for="contact-whatsapp">WhatsApp (Format: 628...)</label>
+          <input class="form-input" type="text" id="contact-whatsapp" placeholder="628123456789" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="contact-email">Email Kontak</label>
+          <input class="form-input" type="email" id="contact-email" placeholder="kontak@domain.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="social-instagram">Instagram URL</label>
+          <input class="form-input" type="url" id="social-instagram" placeholder="https://instagram.com/..." />
+        </div>
+      </div>
+    </div>
+
+    <!-- SEO & IndexNow -->
+    <div class="admin-card">
+      <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; color: #0f172a;">2. SEO & Instant Indexing</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label" for="gsc-verification">Google Search Console Verification Code</label>
+          <input class="form-input" type="text" id="gsc-verification" placeholder="google-site-verification=..." />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="indexnow-key">IndexNow API Key (Bing / Instant Index)</label>
+          <input class="form-input" type="text" id="indexnow-key" placeholder="32-character key" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="default-og-image">Default OG Image URL (Media Sosial)</label>
+        <input class="form-input" type="url" id="default-og-image" placeholder="https://.../og-banner.jpg" />
+      </div>
+    </div>
+
+    <!-- Deploy Hooks -->
+    <div class="admin-card">
+      <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; color: #0f172a;">3. Deploy Webhook (Cloudflare Pages / Netlify)</h3>
+      <div class="form-group">
+        <label class="form-label" for="deploy-hook-url">Deploy Hook URL</label>
+        <input class="form-input" type="url" id="deploy-hook-url" placeholder="https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/..." />
+        <p style="font-size: 0.8rem; color: #64748b; margin-top: 0.35rem;">URL webhook yang dipanggil otomatis untuk men-trigger build SSG saat artikel baru di-publish.</p>
+      </div>
+    </div>
+
+    <!-- Ads & Monetization Engine -->
+    <div class="admin-card">
+      <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; color: #0f172a;">4. Manajemen Iklan & Slot Monetisasi</h3>
+      
+      <div style="display: flex; gap: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+          <input type="checkbox" id="enable-ads-articles" checked />
+          Aktifkan Iklan di Artikel Blog
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+          <input type="checkbox" id="enable-ads-homepage" />
+          Aktifkan Iklan di Homepage
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="ads-paragraph-interval">Sisipkan Iklan In-Content Otomatis Setiap (N Paragraf)</label>
+        <input class="form-input" type="number" id="ads-paragraph-interval" min="1" max="10" value="2" style="max-width: 150px;" />
+        <p style="font-size: 0.8rem; color: #64748b; margin-top: 0.25rem;">Default: 2 (Iklan disisipkan setelah paragraf ke-2). Penulis juga bisa mengetik <code>&lt;!-- ad --&gt;</code> di artikel untuk posisi manual.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label" for="ads-header">Kode Iklan Header (Atas)</label>
+          <textarea class="form-textarea" id="ads-header" rows="3" placeholder="<script ...></script> atau banner leaderboard"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="ads-before-content">Kode Iklan Sebelum Konten Artikel</label>
+          <textarea class="form-textarea" id="ads-before-content" rows="3" placeholder="<ins class='adsbygoogle' ...></ins>"></textarea>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label" for="ads-in-content">Kode Iklan Sela Paragraf (In-Content)</label>
+          <textarea class="form-textarea" id="ads-in-content" rows="3" placeholder="<ins class='adsbygoogle' ...></ins>"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="ads-after-content">Kode Iklan Setelah Konten Artikel</label>
+          <textarea class="form-textarea" id="ads-after-content" rows="3" placeholder="<ins class='adsbygoogle' ...></ins>"></textarea>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="ads-footer">Kode Iklan Footer (Bawah)</label>
+        <textarea class="form-textarea" id="ads-footer" rows="3" placeholder="Sticky banner atau responsive ad unit"></textarea>
+      </div>
+    </div>
+
+    <!-- Custom Scripts -->
+    <div class="admin-card">
+      <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; color: #0f172a;">5. Custom Tracking Scripts</h3>
+      <div class="form-group">
+        <label class="form-label" for="head-scripts">Custom Head Scripts (Google Analytics 4 / Google Tag Manager)</label>
+        <textarea class="form-textarea" id="head-scripts" rows="3" placeholder="<script async src='https://www.googletagmanager.com/gtag/js?id=...'></script>"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="body-scripts">Custom Footer / Body Scripts (Meta Pixel / Custom Tracking)</label>
+        <textarea class="form-textarea" id="body-scripts" rows="3" placeholder="<!-- Meta Pixel Code -->"></textarea>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 3rem;">
+      <button type="submit" id="btn-save-settings" class="btn btn-primary">
+        💾 Simpan Semua Pengaturan
+      </button>
+    </div>
+  </form>
+
+  <script>
+    import { getSettings, updateSettings } from "@core/settings/site";
+
+    const form = document.getElementById("settings-form") as HTMLFormElement;
+    const btnSave = document.getElementById("btn-save-settings") as HTMLButtonElement;
+    const feedback = document.getElementById("settings-feedback") as HTMLDivElement;
+
+    // General & SEO inputs
+    const siteName = document.getElementById("site-name") as HTMLInputElement;
+    const siteTagline = document.getElementById("site-tagline") as HTMLInputElement;
+    const siteDesc = document.getElementById("site-description") as HTMLTextAreaElement;
+    const contactWa = document.getElementById("contact-whatsapp") as HTMLInputElement;
+    const contactEmail = document.getElementById("contact-email") as HTMLInputElement;
+    const socialIg = document.getElementById("social-instagram") as HTMLInputElement;
+    const gscVerif = document.getElementById("gsc-verification") as HTMLInputElement;
+    const indexnowKey = document.getElementById("indexnow-key") as HTMLInputElement;
+    const defaultOg = document.getElementById("default-og-image") as HTMLInputElement;
+    const deployHook = document.getElementById("deploy-hook-url") as HTMLInputElement;
+
+    // Ads inputs
+    const enableAdsArticles = document.getElementById("enable-ads-articles") as HTMLInputElement;
+    const enableAdsHomepage = document.getElementById("enable-ads-homepage") as HTMLInputElement;
+    const adsInterval = document.getElementById("ads-paragraph-interval") as HTMLInputElement;
+    const adsHeader = document.getElementById("ads-header") as HTMLTextAreaElement;
+    const adsBefore = document.getElementById("ads-before-content") as HTMLTextAreaElement;
+    const adsIn = document.getElementById("ads-in-content") as HTMLTextAreaElement;
+    const adsAfter = document.getElementById("ads-after-content") as HTMLTextAreaElement;
+    const adsFooter = document.getElementById("ads-footer") as HTMLTextAreaElement;
+
+    // Custom scripts
+    const headScripts = document.getElementById("head-scripts") as HTMLTextAreaElement;
+    const bodyScripts = document.getElementById("body-scripts") as HTMLTextAreaElement;
+
+    async function loadSettings() {
+      try {
+        const data = await getSettings();
+        if (data) {
+          if (data.site_name) siteName.value = data.site_name;
+          if (data.site_tagline) siteTagline.value = data.site_tagline;
+          if (data.site_description) siteDesc.value = data.site_description;
+          if (data.whatsapp) contactWa.value = data.whatsapp;
+          if (data.email) contactEmail.value = data.email;
+          if (data.instagram) socialIg.value = data.instagram;
+          if (data.gsc_verification) gscVerif.value = data.gsc_verification;
+          if (data.indexnow_key) indexnowKey.value = data.indexnow_key;
+          if (data.default_og_image) defaultOg.value = data.default_og_image;
+          if (data.deploy_hook_url) deployHook.value = data.deploy_hook_url;
+
+          enableAdsArticles.checked = data.enable_ads_articles !== false;
+          enableAdsHomepage.checked = !!data.enable_ads_homepage;
+          if (data.ads_paragraph_interval) adsInterval.value = data.ads_paragraph_interval.toString();
+          if (data.ads_header) adsHeader.value = data.ads_header;
+          if (data.ads_before_content) adsBefore.value = data.ads_before_content;
+          if (data.ads_in_content) adsIn.value = data.ads_in_content;
+          if (data.ads_after_content) adsAfter.value = data.ads_after_content;
+          if (data.ads_footer) adsFooter.value = data.ads_footer;
+
+          if (data.custom_head_scripts) headScripts.value = data.custom_head_scripts;
+          if (data.custom_body_end_scripts) bodyScripts.value = data.custom_body_end_scripts;
+        }
+      } catch (err) {
+        console.error("Failed to fetch settings:", err);
+      }
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      btnSave.disabled = true;
+      btnSave.textContent = "Menyimpan pengaturan...";
+      feedback.style.display = "none";
+
+      const payload = {
+        site_name: siteName.value.trim(),
+        site_tagline: siteTagline.value.trim(),
+        site_description: siteDesc.value.trim(),
+        whatsapp: contactWa.value.trim(),
+        email: contactEmail.value.trim(),
+        instagram: socialIg.value.trim(),
+        gsc_verification: gscVerif.value.trim(),
+        indexnow_key: indexnowKey.value.trim(),
+        default_og_image: defaultOg.value.trim(),
+        deploy_hook_url: deployHook.value.trim(),
+
+        enable_ads_articles: enableAdsArticles.checked,
+        enable_ads_homepage: enableAdsHomepage.checked,
+        ads_paragraph_interval: parseInt(adsInterval.value) || 2,
+        ads_header: adsHeader.value,
+        ads_before_content: adsBefore.value,
+        ads_in_content: adsIn.value,
+        ads_after_content: adsAfter.value,
+        ads_footer: adsFooter.value,
+
+        custom_head_scripts: headScripts.value,
+        custom_body_end_scripts: bodyScripts.value,
+      };
+
+      try {
+        await updateSettings(payload);
+        feedback.style.display = "block";
+        feedback.style.backgroundColor = "#dcfce7";
+        feedback.style.color = "#166534";
+        feedback.style.border = "1px solid #bbf7d0";
+        feedback.textContent = "✅ Pengaturan situs & slot iklan berhasil disimpan!";
+      } catch (err: any) {
+        feedback.style.display = "block";
+        feedback.style.backgroundColor = "#fef2f2";
+        feedback.style.color = "#dc2626";
+        feedback.style.border = "1px solid #fecaca";
+        feedback.textContent = "❌ Gagal menyimpan pengaturan: " + (err.message || "Unknown error");
+      } finally {
+        btnSave.disabled = false;
+        btnSave.textContent = "💾 Simpan Semua Pengaturan";
+      }
+    });
+
+    loadSettings();
+  </script>
+</AdminLayout>
