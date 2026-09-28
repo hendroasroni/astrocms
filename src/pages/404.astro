@@ -7,17 +7,98 @@ import { site } from "@config/site";
   title="404 — Halaman Tidak Ditemukan"
   description={`Halaman yang Anda cari tidak ditemukan di ${site.name}.`}
 >
-  <div class="container not-found-wrapper">
+  <!-- Standard 404 View -->
+  <div id="view-404" class="container not-found-wrapper">
     <span class="error-code">404</span>
     <h1 class="error-title">Halaman Tidak Ditemukan</h1>
     <p class="error-desc">
-      Mohon maaf, halaman yang Anda cari mungkin telah dipindahkan, diubah namanya, atau tidak tersedia.
+      Mohon maaf, halaman yang Anda cari mungkin telah dipindahkan, diubah namanya, atau belum selesai di-rebuild.
     </p>
     <div class="error-actions">
       <a href="/" class="btn btn-primary">&larr; Kembali ke Beranda</a>
-      <a href="/blog" class="btn btn-outline">Baca Artikel</a>
+      <a href="/blog" class="btn btn-outline">Baca Artikel Lain</a>
     </div>
   </div>
+
+  <!-- Dynamic Fallback Article View (For new posts before static rebuild) -->
+  <div id="view-dynamic-article" class="container-narrow dynamic-article-wrapper" style="display: none;">
+    <header class="article-header">
+      <span id="dyn-category" class="article-category">Blog</span>
+      <h1 id="dyn-title" class="article-headline">Memuat Artikel...</h1>
+      <div class="article-metadata">
+        <span id="dyn-date">Dipublikasikan baru-baru ini</span>
+        <span id="dyn-author">Oleh Admin</span>
+      </div>
+    </header>
+
+    <div id="dyn-image-wrap" class="article-featured-image" style="display: none;">
+      <img id="dyn-image" src="" alt="Featured Image" />
+    </div>
+
+    <div id="dyn-content" class="article-prose"></div>
+
+    <footer class="article-footer">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: gap: 1rem;">
+        <a href="/blog" class="btn btn-outline btn-sm">&larr; Kembali ke Daftar Artikel</a>
+        <a href="/" class="btn btn-primary btn-sm">Beranda</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    import { getPosts } from "@core/content/posts";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const path = window.location.pathname.replace(/\/$/, "");
+      const segments = path.split("/").filter(Boolean);
+
+      // Check if user is trying to view a blog post: /blog/slug-name
+      if (segments.length >= 2 && segments[0] === "blog") {
+        const slug = segments[1];
+        try {
+          const posts = await getPosts();
+          const post = posts.find((p) => p.slug === slug && p.status === "published");
+
+          if (post) {
+            const view404 = document.getElementById("view-404");
+            const viewArticle = document.getElementById("view-dynamic-article");
+            const dynTitle = document.getElementById("dyn-title");
+            const dynCategory = document.getElementById("dyn-category");
+            const dynDate = document.getElementById("dyn-date");
+            const dynAuthor = document.getElementById("dyn-author");
+            const dynContent = document.getElementById("dyn-content");
+            const dynImageWrap = document.getElementById("dyn-image-wrap");
+            const dynImage = document.getElementById("dyn-image") as HTMLImageElement;
+
+            if (view404 && viewArticle && dynTitle && dynContent) {
+              view404.style.display = "none";
+              viewArticle.style.display = "block";
+
+              document.title = `${post.title} | ${document.title}`;
+              dynTitle.textContent = post.title;
+              if (dynCategory) dynCategory.textContent = post.category || "Kuliner";
+              if (dynDate) dynDate.textContent = `Dipublikasikan pada ${post.published_at ? new Date(post.published_at).toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" }) : "Baru saja"}`;
+              if (dynAuthor) dynAuthor.textContent = `Oleh ${post.author || "Admin"}`;
+
+              if (post.image && dynImageWrap && dynImage) {
+                dynImage.src = post.image;
+                dynImage.alt = post.title;
+                dynImageWrap.style.display = "block";
+              }
+
+              // Format content lines
+              dynContent.innerHTML = post.content
+                .split("\n\n")
+                .map((para) => `<p>${para.replace(/\n/g, "<br/>")}</p>`)
+                .join("");
+            }
+          }
+        } catch (e) {
+          console.warn("Dynamic article lookup skipped:", e);
+        }
+      }
+    });
+  </script>
 </BaseLayout>
 
 <style>
@@ -56,5 +137,74 @@ import { site } from "@config/site";
     justify-content: center;
     gap: 1rem;
     flex-wrap: wrap;
+  }
+
+  /* Dynamic Article Preview */
+  .dynamic-article-wrapper {
+    padding-top: 3.5rem;
+    padding-bottom: 5rem;
+  }
+
+  .article-header {
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .article-category {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    margin-bottom: 1rem;
+  }
+
+  .article-headline {
+    font-size: 2.25rem;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+    color: var(--color-text);
+  }
+
+  .article-metadata {
+    display: flex;
+    justify-content: center;
+    gap: 1.25rem;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  .article-featured-image {
+    margin-bottom: 2.5rem;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--color-bg-alt);
+  }
+
+  .article-featured-image img {
+    width: 100%;
+    max-height: 450px;
+    object-fit: cover;
+  }
+
+  .article-prose {
+    font-size: 1.125rem;
+    line-height: 1.8;
+    color: #334155;
+  }
+
+  .article-prose :global(p) {
+    margin-bottom: 1.5rem;
+  }
+
+  .article-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
   }
 </style>
