@@ -1,6 +1,6 @@
 /**
  * =========================================================================
- * Google Apps Script - Headless CMS Backend untuk AstroCMS (v2.0 Bulletproof)
+ * Google Apps Script - Headless CMS Backend untuk AstroCMS (v2.1 Fixed)
  * =========================================================================
  * 
  * PETUNJUK DEPLOY:
@@ -42,7 +42,7 @@ function handleRequest(e, method) {
         }
         if (parsed.action) action = parsed.action;
       } catch (parseErr) {
-        // Post data is not JSON, might be raw parameter
+        // Post data is not JSON
       }
     }
 
@@ -132,7 +132,7 @@ function handleRequest(e, method) {
       output = { success: true, data: params.settings };
     }
     else {
-      output = { success: true, message: "AstroCMS API Google Apps Script is running!", availableActions: ["getPosts", "createPost", "updatePost", "deletePost", "getProducts", "getPages", "getSettings"] };
+      output = { success: true, message: "AstroCMS API Google Apps Script is running!" };
     }
 
   } catch (err) {
@@ -148,7 +148,7 @@ function handleRequest(e, method) {
 function getSheetData(ss, sheetName) {
   var sheet = ss.getSheetByName(sheetName);
   if (!sheet) return [];
-  if (sheet.getLastRowNum() < 2 || sheet.getLastColumn() < 1) return [];
+  if (sheet.getLastRow() < 2 || sheet.getLastColumn() < 1) return [];
 
   var data = sheet.getDataRange().getValues();
   if (data.length <= 1) return [];
@@ -181,7 +181,7 @@ function appendRow(ss, sheetName, item) {
     sheet = ss.insertSheet(sheetName);
   }
   
-  if (sheet.getLastColumn() === 0 || sheet.getLastRowNum() === 0) {
+  if (sheet.getLastColumn() === 0 || sheet.getLastRow() === 0) {
     var initialHeaders = Object.keys(item);
     sheet.appendRow(initialHeaders);
   }
@@ -238,7 +238,7 @@ function deleteRow(ss, sheetName, id) {
 
 function getSettingsData(ss) {
   var sheet = ss.getSheetByName("settings");
-  if (!sheet || sheet.getLastRowNum() < 1) return {};
+  if (!sheet || sheet.getLastRow() < 1) return {};
   var data = sheet.getDataRange().getValues();
   var settings = {};
   for (var i = 1; i < data.length; i++) {
