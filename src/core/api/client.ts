@@ -1,12 +1,24 @@
 import type { ApiResponse, Post, SiteSettings, Page, Product } from "./types";
 import { getIdToken } from "@core/auth/auth";
 
-const API_URL = import.meta.env.PUBLIC_API_URL || "";
+export function getApiUrl(): string {
+  if (typeof window !== "undefined") {
+    const custom = localStorage.getItem("astrocms_api_url");
+    if (custom) return custom.trim();
+  }
+  return (import.meta.env.PUBLIC_API_URL || "").trim();
+}
+
+export function setApiUrl(url: string): void {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("astrocms_api_url", url.trim());
+  }
+}
 
 // Storage keys for local caching & demo fallback
 const STORAGE_PREFIX = "astrocms_";
 
-function getLocalData<T>(key: string, defaultVal: T): T {
+export function getLocalData<T>(key: string, defaultVal: T): T {
   if (typeof window === "undefined") return defaultVal;
   const stored = localStorage.getItem(STORAGE_PREFIX + key) || localStorage.getItem("astro_cms_mock_" + key);
   if (!stored) {
@@ -20,7 +32,7 @@ function getLocalData<T>(key: string, defaultVal: T): T {
   }
 }
 
-function setLocalData<T>(key: string, val: T): void {
+export function setLocalData<T>(key: string, val: T): void {
   if (typeof window !== "undefined") {
     localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(val));
     localStorage.setItem("astro_cms_mock_" + key, JSON.stringify(val));
@@ -76,6 +88,7 @@ export async function fetchApi<T = any>(
   options: { method?: "GET" | "POST"; requiresAuth?: boolean } = {}
 ): Promise<ApiResponse<T>> {
   const { method = "GET", requiresAuth = false } = options;
+  const apiUrl = getApiUrl();
 
   if (requiresAuth) {
     const token = await getIdToken();
@@ -85,9 +98,9 @@ export async function fetchApi<T = any>(
   }
 
   // If no backend API configured, serve Mock LocalStorage Database for instant testing!
-  if (!API_URL) {
+  if (!apiUrl) {
     if (typeof window !== "undefined") {
-      await new Promise((r) => setTimeout(r, 80));
+      await new Promise((r) => setTimeout(r, 60));
     }
 
     if (action === "getPosts") {
@@ -146,21 +159,18 @@ export async function fetchApi<T = any>(
 
   // Real Google Apps Script fetch
   try {
+    let result: ApiResponse<T>;
+
     if (method === "GET") {
       const queryParams = new URLSearchParams({ action, ...params });
-      const response = await fetch(`${API_URL}?${queryParams.toString()}`, {
+      const response = await fetch(`${apiUrl}?${queryParams.toString()}`, {
         redirect: "follow",
       });
-      const result = await response.json();
-      
-      // Cache posts locally for offline/instant hydration
-      if (action === "getPosts" && result.success && Array.isArray(result.data)) {
-        setLocalData("posts", result.data);
-      }
-      return result;
+      result = await response.json();
     } else {
+      // POST with text/plain body avoids CORS preflight on Google Apps Script
       const body = JSON.stringify({ action, ...params });
-      const response = await fetch(API_URL, {
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "text/plain;charset=utf-8",
@@ -168,32 +178,34 @@ export async function fetchApi<T = any>(
         body,
         redirect: "follow",
       });
-      const result = await response.json();
+      result = await response.json();
+    }
 
-      // Sync local storage on mutations
-      if (result.success) {
-        if (action === "createPost" && result.data) {
-          const posts = getLocalData<Post[]>("posts", []);
-          posts.unshift(result.data);
-          setLocalData("posts", posts);
-        } else if (action === "updatePost" && result.data) {
-          const posts = getLocalData<Post[]>("posts", []);
-          const idx = posts.findIndex((p) => p.id === params.id);
-          if (idx !== -1) {
-            posts[idx] = { ...posts[idx], ...params.post };
-            setLocalData("posts", posts);
-          }
-        } else if (action === "deletePost") {
-          let posts = getLocalData<Post[]>("posts", []);
-          posts = posts.filter((p) => p.id !== params.id);
+    // Automatically sync local storage on every successful operation for real-time frontend rendering
+    if (result.success) {
+      if (action === "getPosts" && Array.isArray(result.data)) {
+        setLocalData("posts", result.data);
+      } else if (action === "createPost" && result.data) {
+        const posts = getLocalData<Post[]>("posts", []);
+        posts.unshift(result.data as unknown as Post);
+        setLocalData("posts", posts);
+      } else if (action === "updatePost" && result.data) {
+        const posts = getLocalData<Post[]>("posts", []);
+        const idx = posts.findIndex((p) => p.id === params.id);
+        if (idx !== -1) {
+          posts[idx] = { ...posts[idx], ...params.post };
           setLocalData("posts", posts);
         }
+      } else if (action === "deletePost") {
+        let posts = getLocalData<Post[]>("posts", []);
+        posts = posts.filter((p) => p.id !== params.id);
+        setLocalData("posts", posts);
       }
-
-      return result;
     }
+
+    return result;
   } catch (err: any) {
     console.error(`API Error [${action}]:`, err);
-    return { success: false, error: err.message || "Gagal berkomunikasi dengan backend Google Apps Script." };
+    return { success: false, error: err.message || "Gagal berkomunikasi dengan Google Apps Script API." };
   }
 }

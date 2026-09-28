@@ -164,7 +164,25 @@ import AdminLayout from "@layouts/AdminLayout.astro";
     <div id="tab-deploy" class="tab-panel">
       <div class="admin-card">
         <div class="admin-card-header">
-          <h3 class="admin-card-title">Deploy Webhook (Cloudflare Pages / Netlify / Vercel)</h3>
+          <h3 class="admin-card-title">1. Database API (Google Apps Script Web App)</h3>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="google-api-url">Google Apps Script Web App URL</label>
+          <div style="display: flex; gap: 0.75rem;">
+            <input class="form-input" type="url" id="google-api-url" placeholder="https://script.google.com/macros/s/AKfycb.../exec" style="flex: 1;" />
+            <button type="button" id="btn-test-api" class="btn btn-outline btn-sm" style="white-space: nowrap;">
+              🔍 Tes Koneksi Database
+            </button>
+          </div>
+          <p class="form-hint">URL Web App dari Google Sheets Anda yang berakhiran <code>/exec</code>.</p>
+          <div id="api-test-result" style="display: none; margin-top: 0.5rem; font-size: 0.825rem; font-weight: 600; padding: 0.5rem 0.75rem; border-radius: 6px;"></div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3 class="admin-card-title">2. Deploy Webhook (Cloudflare Pages / Netlify / Vercel)</h3>
         </div>
 
         <div class="form-group">
@@ -209,6 +227,7 @@ import AdminLayout from "@layouts/AdminLayout.astro";
 
   <script>
     import { getSettings, updateSettings } from "@core/settings/site";
+    import { getApiUrl, setApiUrl } from "@core/api/client";
 
     // Tab Switching Logic
     const tabButtons = document.querySelectorAll(".tab-btn");
@@ -239,6 +258,9 @@ import AdminLayout from "@layouts/AdminLayout.astro";
     const gscVerif = document.getElementById("gsc-verification") as HTMLInputElement;
     const indexnowKey = document.getElementById("indexnow-key") as HTMLInputElement;
     const defaultOg = document.getElementById("default-og-image") as HTMLInputElement;
+    const googleApiUrl = document.getElementById("google-api-url") as HTMLInputElement;
+    const btnTestApi = document.getElementById("btn-test-api") as HTMLButtonElement;
+    const apiTestResult = document.getElementById("api-test-result") as HTMLDivElement;
     const deployHook = document.getElementById("deploy-hook-url") as HTMLInputElement;
 
     const enableAdsArticles = document.getElementById("enable-ads-articles") as HTMLInputElement;
@@ -252,6 +274,51 @@ import AdminLayout from "@layouts/AdminLayout.astro";
 
     const headScripts = document.getElementById("head-scripts") as HTMLTextAreaElement;
     const bodyScripts = document.getElementById("body-scripts") as HTMLTextAreaElement;
+
+    if (googleApiUrl) {
+      googleApiUrl.value = getApiUrl();
+    }
+
+    if (btnTestApi) {
+      btnTestApi.addEventListener("click", async () => {
+        const url = googleApiUrl.value.trim();
+        if (!url) {
+          (window as any).showToast("Masukkan Google Apps Script URL terlebih dahulu!", "error");
+          return;
+        }
+
+        btnTestApi.disabled = true;
+        btnTestApi.textContent = "Menguji...";
+        apiTestResult.style.display = "block";
+        apiTestResult.style.backgroundColor = "#eff6ff";
+        apiTestResult.style.color = "#1d4ed8";
+        apiTestResult.textContent = "⏳ Menghubungi Google Apps Script...";
+
+        try {
+          const res = await fetch(`${url}?action=getPosts`, { redirect: "follow" });
+          const json = await res.json();
+          if (json && json.success) {
+            setApiUrl(url);
+            apiTestResult.style.backgroundColor = "#dcfce7";
+            apiTestResult.style.color = "#166534";
+            const count = Array.isArray(json.data) ? json.data.length : 0;
+            apiTestResult.textContent = `✅ Terhubung ke Google Sheets! Ditemukan ${count} artikel. URL tersimpan.`;
+            (window as any).showToast("Database Google Sheets Berhasil Terhubung!", "success");
+          } else {
+            apiTestResult.style.backgroundColor = "#fef2f2";
+            apiTestResult.style.color = "#991b1b";
+            apiTestResult.textContent = `❌ Respon error dari Google Apps Script: ${json?.error || "Gagal"}`;
+          }
+        } catch (err: any) {
+          apiTestResult.style.backgroundColor = "#fef2f2";
+          apiTestResult.style.color = "#991b1b";
+          apiTestResult.textContent = `❌ Gagal menghubungi URL: ${err.message}. Pastikan deployment diatur ke 'Anyone'.`;
+        } finally {
+          btnTestApi.disabled = false;
+          btnTestApi.textContent = "🔍 Tes Koneksi Database";
+        }
+      });
+    }
 
     async function loadSettings() {
       try {
@@ -289,6 +356,10 @@ import AdminLayout from "@layouts/AdminLayout.astro";
       e.preventDefault();
       btnSave.disabled = true;
       btnSave.textContent = "Menyimpan...";
+
+      if (googleApiUrl.value.trim()) {
+        setApiUrl(googleApiUrl.value.trim());
+      }
 
       const payload = {
         site_name: siteName.value.trim(),

@@ -1,14 +1,14 @@
 /**
  * =========================================================================
- * Google Apps Script - Headless CMS Backend untuk AstroCMS
+ * Google Apps Script - Headless CMS Backend untuk AstroCMS (v2.0 Bulletproof)
  * =========================================================================
  * 
- * PETUNJUK:
+ * PETUNJUK DEPLOY:
  * 1. JANGAN KLIK tombol "Run" / "Jalankan" di editor Apps Script!
- * 2. Klik tombol "Deploy" (kanan atas) -> "New deployment"
+ * 2. Klik tombol "Deploy" (kanan atas) -> "Manage deployments" (atau "New deployment")
  * 3. Pilih tipe "Web app"
  * 4. Execute as: "Me"
- * 5. Who has access: "Anyone"
+ * 5. Who has access: "Anyone" (PENTING: Jangan "Only myself")
  * 6. Klik "Deploy" & salin URL Web App yang berakhiran /exec
  */
 
@@ -27,15 +27,37 @@ function handleRequest(e, method) {
     var params = {};
     var action = "";
 
-    if (method === "GET") {
-      params = (e && e.parameter) ? e.parameter : {};
-      action = params.action || "";
-    } else {
-      if (e && e.postData && e.postData.contents) {
-        var parsed = JSON.parse(e.postData.contents);
-        action = parsed.action || "";
-        params = parsed;
+    if (e && e.parameter) {
+      for (var key in e.parameter) {
+        params[key] = e.parameter[key];
       }
+      action = params.action || "";
+    }
+
+    if (e && e.postData && e.postData.contents) {
+      try {
+        var parsed = JSON.parse(e.postData.contents);
+        for (var pKey in parsed) {
+          params[pKey] = parsed[pKey];
+        }
+        if (parsed.action) action = parsed.action;
+      } catch (parseErr) {
+        // Post data is not JSON, might be raw parameter
+      }
+    }
+
+    // Auto-parse stringified objects if passed via query params
+    if (params.post && typeof params.post === "string") {
+      try { params.post = JSON.parse(params.post); } catch(err){}
+    }
+    if (params.product && typeof params.product === "string") {
+      try { params.product = JSON.parse(params.product); } catch(err){}
+    }
+    if (params.page && typeof params.page === "string") {
+      try { params.page = JSON.parse(params.page); } catch(err){}
+    }
+    if (params.settings && typeof params.settings === "string") {
+      try { params.settings = JSON.parse(params.settings); } catch(err){}
     }
 
     var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -110,7 +132,7 @@ function handleRequest(e, method) {
       output = { success: true, data: params.settings };
     }
     else {
-      output = { success: true, message: "AstroCMS API Google Apps Script is running!" };
+      output = { success: true, message: "AstroCMS API Google Apps Script is running!", availableActions: ["getPosts", "createPost", "updatePost", "deletePost", "getProducts", "getPages", "getSettings"] };
     }
 
   } catch (err) {
@@ -146,7 +168,7 @@ function getSheetData(ss, sheetName) {
       }
       row[headers[j]] = val;
     }
-    if (row.id) {
+    if (row.id || row.title || row.name) {
       rows.push(row);
     }
   }
